@@ -1,0 +1,54 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Perusindentaatio
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Allman brace style
+BreakBeforeBraces: Allman
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# Visual Studio tekee aina välilyönnin ohjausrakenteen jälkeen: if (…)
+SpaceBeforeParens: ControlStatements
+
+# VS-tyylin välit
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAroundOperators: true
+SpaceBeforeAssignmentOperators: true
+
+# Ei yhden rivin iffejä, loopeja tai funktioita
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# Case-labelit sisennetty kuten VS
+IndentCaseLabels: true
+IndentCaseBlocks: false
+
+# Ei rivikatkaisurajoituksia
+ColumnLimit: 0
+
+# Pieniä stabiileja VS-yhteensopivia asetuksia
+DerivePointerAlignment: false
+PointerAlignment: Left
+BreakBeforeBinaryOperators: None
+BreakConstructorInitializers: AfterColon
+FixNamespaceComments: false
+

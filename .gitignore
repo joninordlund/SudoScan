@@ -1,0 +1,20 @@
+# CMake-roskat mistä tahansa alihakemistosta
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/Makefile2
+**/*.cmake
+**/progress.marks
+**/TargetDirectories.txt
+
+# Qt-spesifit autogenit
+**/SudokuApp_autogen/
+**/reader_autogen/
+**/solver_autogen/
+
+# Build-kansiot
+build/
+
+# Qt Creatorin omat asetukset
+*.user

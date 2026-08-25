@@ -1,0 +1,57 @@
+MainWindow {
+background-color: #faefe6;
+}
+QPushButton {
+    background-color: #0c0c0c;
+/*    background-color: #3d8b40;*/
+    color: ghostwhite;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 14px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Roboto';
+}
+
+QPushButton#colorRe{
+    background-color: #eb2643;
+}
+
+QPushButton#colorGree{
+    background-color: #1d9c09;
+}
+
+QLabel#bottomq{
+    background-color: #1d9c09;
+}
+
+QPushButton:hover {
+    background-color: #45a049;
+}
+QPushButton:pressed {
+
+    background-color: #3d8b40;
+}
+
+QPushButton:disabled {
+
+    background-color: darkgray;
+}
+
+QLineEdit {
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+QLabel {
+    color: #222;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+QLabel#sectionLabel
+ {
+    font-size: 18px;
+    color: #eb2643;
+}

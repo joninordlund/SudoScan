@@ -1,0 +1,21 @@
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 0
+
+# Header-tiedostoissa kaarisulut samalle riville
+BreakBeforeBraces: Attach
+
+# Getterit/setterit yhdellä rivillä
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+
+# Välilyönnit hallitusti
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+
+PointerAlignment: Left
+IndentCaseLabels: true

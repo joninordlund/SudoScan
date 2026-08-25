@@ -1,0 +1,119 @@
+/* --- YLEISET NAPIT --- */
+QWidget#center {
+    background-color: #f5efed;
+}
+
+QPushButton {
+    background-color: #2c3e50;
+    color: ghostwhite;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: 'Roboto';
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #3498db; /* Kirkkaampi SudoScan-sininen */
+    border: 1px solid #2980b9;
+}
+
+QPushButton:pressed {
+    background-color: #2980b9;
+    padding-top: 8px; /* Pieni "painumis-efekti" */
+    padding-bottom: 4px;
+}
+
+QPushButton:disabled {
+    background-color: #7f8c8d;
+    color: #bdc3c7;
+    border: 1px solid #95a5a6;
+}
+
+
+
+QPushButton#undo, QPushButton#redo,
+QPushButton#leftBrowse, QPushButton#rightBrowse {
+    min-width: 35px;    /* Pakotetaan kapeammaksi */
+    max-width: 35px;
+    padding: 0px;       /* Poistetaan padding, jotta ikoni keskittyy */
+    margin: 2px;        /* Lisätään hieman ilmaa nappien väliin */
+    background-color: #34495e;
+    border: 1px solid #34495e;
+    qproperty-iconSize: 20px;
+}
+
+QPushButton#undo:hover, QPushButton#redo:hover,
+QPushButton#leftBrowse:hover, QPushButton#rightBrowse:hover {
+    background-color: #3498db;
+    border: 1px solid #2980b9;
+}
+
+QPushButton#leftBrowse:disabled,
+QPushButton#rightBrowse:disabled,
+QPushButton#undo:disabled,
+QPushButton#redo:disabled {
+    background-color: #7f8c8d;
+    border: 1px solid #7f8c8d;
+/*    color: #000000;
+    opacity: 0.1;*/
+}
+
+Cell {
+    background-color: white;
+    border: 1px solid #dcdde1;
+    font-size: 24px;
+}
+
+Cell[selected="true"] {
+    background-color: #d1e9ff;
+}
+
+Cell[cursor="true"] {
+    background-color: #a3d2ca;
+    border: 2px solid #3498db;
+}
+
+Cell[given="true"] {
+    color: #000000;
+    font-weight: bold;
+}
+
+Cell[row="2"], Cell[row="5"] { border-bottom: 3px solid #2c3e50; }
+Cell[col="2"], Cell[col="5"] { border-right: 3px solid #2c3e50; }
+
+QLabel {
+    color: #222;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+QLabel#sectionLabel
+ {
+    font-size: 18px;
+    color: #eb2643;
+}
+
+QLabel:disabled {
+    color: #7f8c8d;
+}
+
+QLabel {
+    color: #2c3e50;
+}
+
+QToolButton#starButton {
+    color: gray;
+    font-size: 20px;
+    border: none;
+    background: transparent;
+}
+
+QToolButton#starButton:checked {
+    color: gold;
+}
+
+QToolButton#starButton:hover {
+    font-size: 26px; /* Kasvattaa tähteä */
+    color: #f1c40f;  /* Kirkkaampi kulta */
+}

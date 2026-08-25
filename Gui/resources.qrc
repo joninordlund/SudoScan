@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/fonts">
+        <file>fonts/Roboto-Regular.ttf</file>
+        <file>fonts/Roboto-Bold.ttf</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>icons/undo.svg</file>
+        <file>icons/redo.svg</file>
+        <file>icons/chevron_right.svg</file>
+        <file>icons/chevron_left.svg</file>
+    </qresource>
+    <qresource prefix="/style">
+        <file>style.css.old</file>
+    </qresource>
+</RCC>

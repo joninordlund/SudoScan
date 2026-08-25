@@ -1,0 +1,17 @@
+Ctrl + Alt + O - Järjestää ja optimoi includet (poistaa turhat)
+Yleiset Qt Creator -pikanäppäimet:
+
+F1 - Context Help
+F2 - Siirry määrittelyyn (follow symbol)
+F4 - Vaihda .h ↔ .cpp välillä
+Ctrl + K - Locator (nopea haku)
+Ctrl + Space - Code completion
+Alt + Enter - Quick fix (sisältää include-lisäyksen)
+Ctrl + Shift + R - Rename symbol koko projektissa
+Ctrl + I - Auto-indent selection
+Ctrl + Shift + U - Etsi kaikki käyttökohteet (Find Usages)
+Ctrl + ins - kopioi rivi
+Shift + del - leikkaa rivi
+
+
+Alt + Enter on paras - se ehdottaa ratkaisuja kaikkiin ongelmiin, ei vain includeihin!
