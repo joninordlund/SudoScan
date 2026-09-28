@@ -41,7 +41,7 @@ public:
 private:
     vector<Node> m_nodes;
     Matrix m_matrix;
-    vector<int> lenVec;
+    vector<int> m_lenVec;
     vector<int> m_solution;
     int N, M;
     vector<vector<int>> m_allSolutions;

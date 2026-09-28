@@ -12,8 +12,7 @@ enum class Symmetry {
     Horizontal
 };
 
-class SolutionSet
-{
+class SolutionSet {
   public:
     SolutionSet()
         : m_index(0), m_maxSolCount(25), m_solutions{{}} {}

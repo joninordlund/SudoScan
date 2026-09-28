@@ -9,7 +9,7 @@
         <file>icons/chevron_right.svg</file>
         <file>icons/chevron_left.svg</file>
     </qresource>
-    <qresource prefix="/style">
-        <file>style.css.old</file>
+    <qresource prefix="/">
+        <file>style.css</file>
     </qresource>
 </RCC>

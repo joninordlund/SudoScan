@@ -24,7 +24,7 @@ void DLXBuilder::build()
 {
     int M = m_matrix.size();
     int N = m_matrix[0].size();
-    lenVec.resize(N);
+    m_lenVec.resize(N);
 
     // To simplify the handling, replace 1's in the matrix by
     // node indexes
@@ -36,7 +36,7 @@ void DLXBuilder::build()
             if (m_matrix[i][j] > 0)
             {
                 m_matrix[i][j] = idx++;
-                lenVec[j]++;
+                m_lenVec[j]++;
             }
         }
         // skip spacer indexes
@@ -103,7 +103,7 @@ void DLXBuilder::build()
                 {
                     node.left = posMod(j, N + 1);
                     node.right = posMod(j + 2, N + 1);
-                    node.len = lenVec[j];
+                    node.len = m_lenVec[j];
                 }
                 else
                 {
@@ -146,10 +146,10 @@ void DLXBuilder::cover(int col)
     }
 }
 
-void DLXBuilder::hide(int p)
+void DLXBuilder::hide(int row)
 {
-    int q = p + 1;
-    while (q != p)
+    int q = row + 1;
+    while (q != row)
     {
         int x = m_nodes[q].top;
         if (x < 0) // q is a spacer
@@ -181,10 +181,10 @@ void DLXBuilder::uncover(int col)
     m_nodes[right].left = col;
 }
 
-void DLXBuilder::unhide(int p)
+void DLXBuilder::unhide(int row)
 {
-    int q = p - 1;
-    while (q != p)
+    int q = row - 1;
+    while (q != row)
     {
         int x = m_nodes[q].top;
         if (x < 0) // q is a spacer

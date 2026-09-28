@@ -1,0 +1,61 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {"name": "Release SudoScan",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/linuxguy/projects/SudoScan/build-release/Gui/SudoScan",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/linuxguy/projects/SudoScan",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]},
+        {"name": "RelWithDebInfo SudoScan",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/linuxguy/projects/SudoScan/build-relwithdebinfo/Gui/SudoScan",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/linuxguy/projects/SudoScan",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]},
+        {
+            "name": "Debug SudoScan",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/linuxguy/projects/SudoScan/Gui/SudoScan",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/linuxguy/projects/SudoScan",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

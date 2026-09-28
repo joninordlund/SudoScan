@@ -15,6 +15,21 @@
 
 # Build-kansiot
 build/
+build-release/
+build-relwithdebinfo/
+build-test/
 
 # Qt Creatorin omat asetukset
 *.user
+
+# AppImage
+AppDir/
+*.AppImage
+
+# AppImage build tools
+linuxdeploy*.AppImage
+
+# ylim
+readme.zip
+readme/
+

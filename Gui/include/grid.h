@@ -87,7 +87,6 @@ class GridView : public QWidget {
     void deleteCell();
     void changeCell(int digit, EMarkType type, bool isGiven);
     CellData handleNumberInput(int x, int y, int digit, EMarkType inputType);
-    void reloadStyle();
     void resetSolutions();
     void peekSingleSolution();
 

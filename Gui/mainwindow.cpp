@@ -612,14 +612,21 @@ void MainWindow::onPeek()
 
 void MainWindow::onLoadImage()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open Sudoku Image"), "",
-                                                    tr("Images (*.png *.jpg *.jpeg *.bmp)"));
+    QSettings settings;
+    QString defaultPath = QDir::homePath() + "/Documents";
+    QString lastDir = settings.value("last_image_load_dir", defaultPath).toString();
 
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Open Sudoku Image"),
+                                                    lastDir,
+                                                    tr("Images (*.png *.jpg *.jpeg *.bmp)"));
     if (fileName.isEmpty())
     {
         return;
     };
+
+    QFileInfo fileInfo(fileName);
+    settings.setValue("last_image_load_dir", fileInfo.absolutePath());
     m_image->load(fileName);
 }
 
@@ -731,13 +738,9 @@ void MainWindow::onSaveRequested()
         QFileInfo fileInfo(fileName);
         settings.setValue("last_save_dir", fileInfo.absolutePath());
 
-        if (SudokuSerializer::saveToFile(fileName, m_grid->getBoard(), *m_grid->getHistory()))
+        if (!SudokuSerializer::saveToFile(fileName, m_grid->getBoard(), *m_grid->getHistory()))
         {
-            qDebug() << "Tallennettu onnistuneesti: " << fileName;
-        }
-        else
-        {
-            QMessageBox::critical(this, "Virhe", "Tiedoston tallennus epäonnistui.");
+            QMessageBox::critical(this, "Error", "Saving file failed");
         }
     }
 }
@@ -751,7 +754,7 @@ void MainWindow::onLoadRequested()
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     "Open Sudoku",
                                                     lastDir,
-                                                    "Sudoku files (*.sdk);;Kaikki tiedostot (*)");
+                                                    "Sudoku files (*.sdk);;All files (*)");
 
     if (!fileName.isEmpty())
     {

@@ -13,7 +13,7 @@ add_executable(SudoScan
     resources.qrc
     include/sudokuserializer.h sudokuserializer.cpp
     include/countlabel.h countlabel.cpp
-    style.css
+    # style.css
     include/qrmanager.h qrmanager.cpp
     include/qrcodegen.hpp qrcodegen.cpp
     help.html
@@ -33,7 +33,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
     resources.qrc
     include/sudokuserializer.h sudokuserializer.cpp
     include/countlabel.h countlabel.cpp
-    style.css
+    #style.css
     include/qrmanager.h qrmanager.cpp
     include/qrcodegen.hpp qrcodegen.cpp
     help.html
@@ -53,4 +53,43 @@ target_link_libraries(SudoScan
         Qt6::Concurrent
         solver
         reader
+)
+
+set(TESSDATA_SOURCE
+    ${CMAKE_SOURCE_DIR}/tessdata/eng.traineddata
+)
+
+add_custom_command(TARGET SudoScan POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:SudoScan>/tessdata"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${TESSDATA_SOURCE}"
+            "$<TARGET_FILE_DIR:SudoScan>/tessdata/eng.traineddata"
+)
+
+set(TESSDATA_SOURCE
+    ${CMAKE_SOURCE_DIR}/tessdata/eng.traineddata
+)
+
+add_custom_command(TARGET SudoScan POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:SudoScan>/tessdata"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${TESSDATA_SOURCE}"
+            "$<TARGET_FILE_DIR:SudoScan>/tessdata/eng.traineddata"
+)
+
+include(GNUInstallDirs)
+
+install(TARGETS SudoScan
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+    FILES
+        ${CMAKE_SOURCE_DIR}/tessdata/eng.traineddata
+    DESTINATION
+        ${CMAKE_INSTALL_BINDIR}/tessdata
 )

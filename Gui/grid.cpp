@@ -55,7 +55,6 @@ GridView::GridView(QWidget* parent) :
                 emit solutionCountChanged(m_solutionSet.currentIndex() + 1, m_solutionSet.count());
             }, Qt::QueuedConnection);
         }); });
-    reloadStyle();
     updateUI();
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -453,7 +452,7 @@ void GridView::changeCell(int digit, EMarkType type, bool isGiven)
     {
         m_history.setNewCommand(command);
     }
-    if (digitChanged)
+    if (digitChanged && m_editMode != SOLVE)
     {
         m_debounceTimer->start();
     }
@@ -498,20 +497,3 @@ void GridView::updateGridFullStatus()
     emit gridFullStatusChanged(full);
 }
 
-void GridView::reloadStyle()
-{
-#ifdef QT_DEBUG
-
-    QString sourcePath = QFileInfo(__FILE__).absolutePath();
-    QFile file(sourcePath + "/style.css");
-    qDebug() << "Source: " << sourcePath;
-#else
-    QFile styleFile(":/style.qss");
-#endif
-    if (file.open(QFile::ReadOnly))
-    {
-        QString styleSheet = QLatin1String(file.readAll());
-        qApp->setStyleSheet(styleSheet);
-        file.close();
-    }
-}

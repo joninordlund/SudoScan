@@ -1,10 +1,10 @@
 #include <chrono>
 #include <vector>
 
-#include "sudokusolver.h"
 #include "DLXBuilder.h"
+#include "sudokusolver.h"
 
-pair<Matrix, vector<tuple<int, int, int>>> SudokuSolver::makeSudokuMatrix(const Matrix &sudoku)
+pair<Matrix, vector<tuple<int, int, int>>> SudokuSolver::makeSudokuMatrix(const Matrix& sudoku)
 {
     const int M = 9;
 
@@ -40,12 +40,12 @@ pair<Matrix, vector<tuple<int, int, int>>> SudokuSolver::makeSudokuMatrix(const 
     return res;
 }
 
-vector<Matrix> SudokuSolver::getSolutions(const Matrix &sudoku, bool random, int maxCount)
+vector<Matrix> SudokuSolver::getSolutions(const Matrix& sudoku, bool random, int maxCount)
 {
     auto sudokuMat = makeSudokuMatrix(sudoku);
 
     DLXBuilder dlx(sudokuMat.first);
-    if(random)
+    if (false)
     {
         dlx.setRandomMode(true);
     }
