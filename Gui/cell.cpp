@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 
-Cell::Cell(int row, int col, QWidget* parent) :
+Cell::Cell(int row, int col, int size, QWidget* parent) :
     QWidget(parent),
     m_row(row),
     m_col(col),
@@ -11,8 +11,14 @@ Cell::Cell(int row, int col, QWidget* parent) :
     m_centerMarks(0),
     m_cornerMarks(0)
 {
-    setFixedSize(70, 70);
+    // setFixedSize(70, 70);
+    setFixedSize(size, size);
     setFocusPolicy(Qt::StrongFocus);
+}
+
+void Cell::setSize(int size)
+{
+    setFixedSize(size, size);
 }
 
 void Cell::setSelected(bool sel)

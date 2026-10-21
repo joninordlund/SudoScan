@@ -31,7 +31,7 @@ class GridView : public QWidget {
     Q_OBJECT
 
   public:
-    explicit GridView(QWidget* parent = nullptr);
+    explicit GridView(int cellSize, QWidget* parent = nullptr);
 
     // vector<vector<CellData>> toMatrix();
     // void fromMatrix(const vector<vector<CellData>>& matrix);
@@ -41,6 +41,7 @@ class GridView : public QWidget {
     void updateUI();
     void setDifficulty(int level);
     void setSymmetry(Symmetry symmetry) { m_symmetry = symmetry; }
+
   public slots:
     void newSudoku(const reader::SudokuGrid& grid);
     void handleMousePress(Cell* cell, bool ctrl);
@@ -74,7 +75,6 @@ class GridView : public QWidget {
     bool m_isDragging;
     bool m_isPeeking;
     EEditMode m_editMode;
-    bool m_dirty;
     SudokuBoard m_board;
     SolutionSet m_solutionSet;
     History m_history;
@@ -93,7 +93,8 @@ class GridView : public QWidget {
     void updateGridFullStatus();
 
   protected:
-    void keyPressEvent(QKeyEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+    void keyPressEvent(QKeyEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 };

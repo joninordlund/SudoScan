@@ -85,6 +85,7 @@ class MainWindow : public QWidget
     QPushButton* m_helpBtn;
     qint64 m_accumulatedTimeMs{0};
     bool m_isTimerRunning = false;
+    int m_areaSize;
 
   private:
     QWidget* createLeftControls();

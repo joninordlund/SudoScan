@@ -4,7 +4,11 @@
 #include <opencv2/opencv.hpp>
 #include <stdexcept>
 #include <tesseract/baseapi.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 
 std::pair<reader::SudokuGrid, cv::Mat> SudokuReader::getImageData(const cv::Mat& img)
 {
@@ -20,25 +24,42 @@ std::pair<reader::SudokuGrid, cv::Mat> SudokuReader::getImageData(const cv::Mat&
 
 std::string getExecutablePath()
 {
+#ifdef _WIN32
+    char result[MAX_PATH];
+    DWORD count = GetModuleFileNameA(nullptr, result, MAX_PATH);
+
+    if (count != 0)
+    {
+        std::string path(result, count);
+        return path.substr(0, path.find_last_of("\\/"));
+    }
+#else
     char result[PATH_MAX];
     ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+
     if (count != -1)
     {
         std::string path(result, count);
         return path.substr(0, path.find_last_of("/"));
     }
+#endif
+
     return "";
 }
-
 void SudokuReader::setImage(const cv::Mat& img)
 {
     m_processor = std::make_unique<ImageProcessor>(img);
     m_tess = std::make_unique<tesseract::TessBaseAPI>();
 
-    // const char *datapath = "/usr/share/tesseract-ocr/5/tessdata/";
     std::string appDir = getExecutablePath();
     std::string tessPath = appDir + "/tessdata/";
+
+#ifdef _WIN32
+    std::string tessDataPrefix = "TESSDATA_PREFIX=" + tessPath;
+    _putenv(tessDataPrefix.c_str());
+#else
     setenv("TESSDATA_PREFIX", tessPath.c_str(), 1);
+#endif
 
     if (m_tess->Init(nullptr, "eng", tesseract::OEM_TESSERACT_ONLY))
     {
@@ -47,13 +68,17 @@ void SudokuReader::setImage(const cv::Mat& img)
     }
 
     m_tess->SetPageSegMode(tesseract::PSM_SINGLE_CHAR);
+
+#ifdef _WIN32
+    m_tess->SetVariable("debug_file", "NUL");
+#else
     m_tess->SetVariable("debug_file", "/dev/null");
+#endif
     m_tess->SetVariable("tessedit_char_whitelist", "123456789");
     m_tess->SetVariable("classify_bln_numeric_mode", "1");
     m_tess->SetVariable("enable_new_segsearch", "0");
     m_tess->SetVariable("classify_enable_learning", "0");
     m_tess->SetVariable("classify_enable_adaptive_matcher", "1");
-    m_tess->SetVariable("enable_new_segsearch", "0");
 }
 
 std::pair <reader::SudokuGrid, cv::Mat> SudokuReader::getSudokuCells(const cv::Mat& processedImg)

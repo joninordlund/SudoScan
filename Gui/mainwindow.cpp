@@ -9,18 +9,37 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPdfWriter>
+#include <QScreen>
 #include <QStyle>
 #include <QVBoxLayout>
 #include <QtPrintSupport/qprintpreviewdialog.h>
 #include <helpdialog.h>
 
-const int areaSize = 630;
+// const int areaSize = 630;
 // const int areaSize = 540;
 
 MainWindow::MainWindow(QWidget* parent) :
     QWidget{parent}, m_difficulty(1), m_grid(nullptr)
 {
-    setFixedSize(1560, 740);
+    // setFixedSize(1380, 650);
+    QScreen* screen = QGuiApplication::primaryScreen();
+    QRect available = screen->availableGeometry();
+
+
+    constexpr int fixedWidth = 96 + 120 + 3 * 20;
+    constexpr int margins = 22;
+    constexpr int extraMargin = 40;
+
+    int maxAreaSize =
+        (available.width() - fixedWidth - margins - extraMargin) / 2;
+
+    m_areaSize = qMin(540, maxAreaSize);
+
+    // int windowWidth = 2 * m_areaSize + fixedWidth + margins;
+    // setFixedSize(windowWidth, 650);
+    setMinimumSize(1200, 650);
+    m_areaSize = (m_areaSize / 9) * 9;
+
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     QWidget* centerArea = new QWidget;
     QHBoxLayout* centerLayout = new QHBoxLayout(centerArea);
@@ -28,12 +47,13 @@ MainWindow::MainWindow(QWidget* parent) :
     centerLayout->setContentsMargins(0, 10, 0, 0);
 
     centerLayout->addWidget(createLeftControls(), 0, Qt::AlignTop);
-    centerLayout->addWidget(createSudokuArea(), 0, Qt::AlignTop);
-    centerLayout->addWidget(createImageArea(), 0, Qt::AlignTop);
+    centerLayout->addWidget(createSudokuArea(), 1);
+    centerLayout->addWidget(createImageArea(), 1);
     centerLayout->addWidget(createImageControls(), 0, Qt::AlignTop);
 
     mainLayout->addWidget(centerArea);
     mainLayout->addLayout(createBottomBar());
+    mainLayout->setContentsMargins(11, 11, 11, 11);
 
     onEditModeToggled(m_editModeToggle->isChecked());
     m_qrManager = new QrManager(this);
@@ -58,7 +78,7 @@ QWidget* MainWindow::createLeftControls()
     const int spacing = 4;
     QWidget* controlArea = new QWidget;
     controlArea->setFixedWidth(96);
-    controlArea->setFixedHeight(areaSize);
+    // controlArea->setFixedHeight(630);
     QVBoxLayout* layout = new QVBoxLayout(controlArea);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
@@ -121,6 +141,7 @@ QWidget* MainWindow::createLeftControls()
     m_clearBtn = new QPushButton("Clear");
     m_randomBtn = new QPushButton("Random");
     m_generateBtn = new QPushButton("Generate");
+    m_generateBtn->setMinimumHeight(30);
     QHBoxLayout* starLayout = setupStars();
 
     starLayout->setContentsMargins(0, 0, 0, 0);
@@ -131,19 +152,26 @@ QWidget* MainWindow::createLeftControls()
     QLabel* symmLbl = new QLabel(this);
     symmLbl->setText("Symmetry:");
     m_symmetryCombo = new QComboBox(this);
+    m_symmetryCombo->setMinimumHeight(30);
 
     m_symmetryCombo->addItem("None", static_cast<int>(Symmetry::None));
     m_symmetryCombo->addItem("Rotational", static_cast<int>(Symmetry::Rotate180));
     m_symmetryCombo->addItem("Horizontal", static_cast<int>(Symmetry::Horizontal));
     m_symmetryCombo->addItem("Vertical", static_cast<int>(Symmetry::Vertical));
 
+    // QVBoxLayout* genGroup = new QVBoxLayout();
+    // genGroup->setSpacing(2);
+
     QVBoxLayout* genGroup = new QVBoxLayout();
-    genGroup->setSpacing(2);
+    genGroup->setSpacing(4);
+
     genGroup->addWidget(m_generateBtn);
     genGroup->addLayout(starLayout);
-    genGroup->setSpacing(4);
     genGroup->addWidget(symmLbl);
     genGroup->addWidget(m_symmetryCombo);
+
+    genGroup->setSizeConstraint(QLayout::SetMinimumSize);
+
     layout->addLayout(genGroup);
     updateStars(m_difficulty);
 
@@ -201,24 +229,36 @@ QWidget* MainWindow::createLeftControls()
 QWidget* MainWindow::createSudokuArea()
 {
     QWidget* centerColumn = new QWidget;
-
+    // centerColumn->setFixedHeight(m_areaSize + 100);
     QVBoxLayout* colLayout = new QVBoxLayout(centerColumn);
     colLayout->setContentsMargins(0, 0, 0, 0);
     colLayout->setSpacing(8);
 
+    // QWidget* leftSquare = new QWidget;
+    // leftSquare->setFixedSize(m_areaSize, m_areaSize);
     QWidget* leftSquare = new QWidget;
-    leftSquare->setFixedSize(areaSize, areaSize);
+    leftSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    leftSquare->setMaximumSize(700, 700);
+    
     QHBoxLayout* gridLayout = new QHBoxLayout(leftSquare);
     gridLayout->setContentsMargins(0, 0, 0, 0);
-    m_grid = new GridView(leftSquare);
+    m_grid = new GridView(m_areaSize / 9, leftSquare);
+    qDebug() << "leftSquare:" << leftSquare->size();
+    qDebug() << "grid:" << m_grid->size();
     gridLayout->addWidget(m_grid);
 
+    // colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
+    // colLayout->addStretch();
     colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
+    colLayout->addStretch();
+
+
+
 
     QWidget* bottomControls = new QWidget;
     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
     bottomLayout->setContentsMargins(0, 0, 0, 0);
-
+    colLayout->addWidget(bottomControls);
     // Check Button
     m_checkBtn = new QPushButton("Check");
     m_checkBtn->setFixedWidth(100);
@@ -255,7 +295,10 @@ QWidget* MainWindow::createImageArea()
     colLayout->setSpacing(8);
 
     QFrame* rightSquare = new QFrame;
-    rightSquare->setFixedSize(areaSize, areaSize);
+    // rightSquare->setFixedSize(m_areaSize, m_areaSize);
+    rightSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    rightSquare->setMaximumSize(700, 700);
+
     rightSquare->setFrameShape(QFrame::Box);
     rightSquare->setLineWidth(3);
 

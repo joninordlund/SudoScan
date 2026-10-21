@@ -5,11 +5,12 @@ class Cell : public QWidget
 {
     Q_OBJECT
   public:
-    Cell(int row, int col, QWidget* parent = nullptr);
+    Cell(int row, int col, int size, QWidget* parent = nullptr);
     void setDigit(int digit, bool isGiven);
     void setSelected(bool sel);
     void setCursor(bool cursor);
     void setGiven(bool given);
+    void setSize(int size);
 
     bool isCursor() const { return m_isCursor; }
     bool isGiven() const { return m_isGiven; }

@@ -3,6 +3,7 @@
 #include "sudokusolver.h"
 
 #include <QApplication>
+#include <QResizeEvent>
 #include <QDir>
 #include <QFile>
 #include <QFrame>
@@ -13,19 +14,21 @@
 #include <qtimer.h>
 #include <solutionset.h>
 
-GridView::GridView(QWidget* parent) :
+GridView::GridView(int cellSize, QWidget* parent) :
     QWidget(parent),
     m_history(this),
     m_cells(81),
     m_lastSelectedCell(nullptr),
     m_isDragging(false),
     m_isPeeking(false),
-    m_dirty(false),
     m_editMode(SOLVE),
     m_removedCount(33),
     m_solLocked(false)
 {
-    setFixedSize(630, 630);
+    // setFixedSize(630, 630);
+
+    // setFixedSize(cellSize * 9, cellSize * 9);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QGridLayout* layout = new QGridLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -34,10 +37,11 @@ GridView::GridView(QWidget* parent) :
     {
         int row = i / 9;
         int col = i % 9;
-        m_cells[i] = new Cell(row, col, this);
+        m_cells[i] = new Cell(row, col, cellSize, this);
         connect(m_cells[i], &Cell::cellClicked, this, &GridView::handleMousePress);
         layout->addWidget(m_cells[i], row, col);
     }
+
     connect(&m_history, &History::historyStateChanged, this, &GridView::handleHistoryChanged);
 
     m_debounceTimer = new QTimer(this);
@@ -57,6 +61,18 @@ GridView::GridView(QWidget* parent) :
         }); });
     updateUI();
     setFocusPolicy(Qt::StrongFocus);
+}
+
+void GridView::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+
+    int cellSize = qMin(width(), height()) / 9;
+
+    for (Cell* cell : m_cells)
+    {
+        cell->setSize(cellSize);
+    }
 }
 
 void GridView::updateUI()

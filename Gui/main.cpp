@@ -14,6 +14,7 @@ void loadStyleSheet()
     {
         qApp->setStyleSheet(QLatin1String(file.readAll()));
         file.close();
+
     }
     else
     {

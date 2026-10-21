@@ -37,7 +37,7 @@ class QrManager : public QObject {
 
   private:
     QString m_currentUuid;
-    QString m_baseUrl = "https://sudoku-scanner.duckdns.org/";
+    QString m_baseUrl = "https://sudoscan.duckdns.org";
     QTimer* m_pollTimer;
     QTimer* m_sessionTimer;
 

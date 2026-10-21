@@ -128,8 +128,8 @@ void QrManager::onNewSessionFinished()
         QByteArray data = reply->readAll();
         QJsonDocument doc = QJsonDocument::fromJson(data);
         m_currentUuid = doc.object()["uuid"].toString();
-        qDebug() << m_currentUuid;
-        emit qrCodeChanged(generateQrPixmap(m_baseUrl + "c/" + m_currentUuid));
+        qDebug() << m_baseUrl + "/c/" + m_currentUuid;
+        emit qrCodeChanged(generateQrPixmap(m_baseUrl + "/c/" + m_currentUuid));
 
         if (!m_pollTimer->isActive())
         {
