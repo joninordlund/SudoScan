@@ -13,7 +13,7 @@ The goal is to select rows such that every column contains exactly one selected 
 In this example, **rows A and E form an exact cover**. Together, they cover all five columns, with each column covered exactly once.
 
 <div align="center">
-  <img src="images/exact_cover_rows_a_and_e.svg" width="75%" alt="Exact cover example: rows A and E cover all five columns exactly once">
+  <img src="images/exact_cover_rows_a_and_e.svg" width="85%" alt="Exact cover example: rows A and E cover all five columns exactly once">
 </div>
 
 ### Formulating Sudoku as Exact Cover
@@ -56,7 +56,7 @@ Data nodes within each row are stored consecutively in memory. A spacer node mar
 When traversal reaches a spacer from the left, it jumps to the first data node of the row. When traversal reaches it from the right, it jumps to the last data node.
 
 <div align="center">
-  <img src="images/spacers.png" width="75%" alt="Spacers">
+  <img src="images/spacers.png" width="85%" alt="Spacers">
 </div>
 
 **Vertical links**
@@ -66,7 +66,7 @@ Each column contains a circular doubly linked list of data nodes representing th
 When a row is hidden, its data nodes are temporarily unlinked from their respective vertical lists. The nodes remain in memory, retaining the link information needed to restore them later.
 
 <div align="center">
-  <img src="images/dlx_example_matrix_structure.svg" width="75%" alt="Dancing Links example">
+  <img src="images/dlx_example_matrix_structure.svg" width="85%" alt="Dancing Links example">
 </div>
 
 ### Cover and Hide Operations
@@ -92,7 +92,7 @@ Consider the same 6×5 matrix used in the earlier example. The column lengths ar
 The Minimum Remaining Values (MRV) heuristic selects column 4 because it has the fewest remaining candidates. Its only `1` is in row A.
 
 <div align="center">
-  <img src="images/dlx_cover_column_4_en.svg" width="75%" alt="Cover column 4">
+  <img src="images/dlx_cover_column_4_en.svg" width="85%" alt="Cover column 4">
 </div>
 
 The `cover(4)` operation removes the links between column headers 3 and 4, and between headers 4 and 5. It then connects headers 3 and 5 directly, excluding column 4 from the active header list. The column header and its data nodes remain in memory.
@@ -115,7 +115,7 @@ The `uncover(col)` and `unhide(row)` operations reverse the changes made by `cov
 #### Example: Uncovering Column 4
 
 <div align="center">
-  <img src="images/dlx_uncover_column_4.svg" width="75%" alt="Uncover column 4">
+  <img src="images/dlx_uncover_column_4.svg" width="85%" alt="Uncover column 4">
 </div>
 
 The `uncover(4)` operation traverses the column's data nodes from bottom to top and calls `unhide(row)` for each one.
@@ -154,4 +154,5 @@ The search succeeds when all columns have been covered. The selected rows then f
 
 For the original treatment of Algorithm X and Dancing Links, see Donald Knuth's work:
 
-- [Dancing Links — Donald E. Knuth (Pre-Fascicle 5C, 2019)](https://archive.org)
+- [Dancing Links — Donald E. Knuth (Pre-Fascicle 5C, 2019)](https://cs.stanford.edu/~knuth/fasc5c.ps.gz)
+- [The Art of Computer Programming — Official website](https://cs.stanford.edu/~knuth/taocp.html)
