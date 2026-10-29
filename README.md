@@ -64,7 +64,7 @@ Data nodes within each row are stored consecutively in memory. A spacer node mar
 
 When traversal reaches a spacer from the left, it jumps to the first data node of the row. When traversal reaches it from the right, it jumps to the last data node.
 
-![Spacers](images/spacers.svg)
+![Spacers](images/spacers.png)
 
 **Vertical links**
 
