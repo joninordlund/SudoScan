@@ -12,8 +12,9 @@ The goal is to select rows such that every column contains exactly one selected 
 
 In this example, **rows A and E form an exact cover**. Together, they cover all five columns, with each column covered exactly once.
 
-
-![Exact cover example: rows A and E cover all five columns exactly once](images/exact_cover_rows_a_and_e.svg)
+<div align="center">
+  <img src="images/exact_cover_rows_a_and_e.svg" width="75%" alt="Exact cover example: rows A and E cover all five columns exactly once">
+</div>
 
 ### Formulating Sudoku as Exact Cover
 
@@ -28,7 +29,7 @@ The Sudoku rules can be expressed as four groups of constraints:
 - **Column constraint:** Each digit must appear exactly once in each column.
 - **Box constraint:** Each digit must appear exactly once in each 3×3 box.
 
-Each group contains 81 constraints, resulting in a matrix with **729 rows and 324 columns** 9 x 81 rows and 4 x 81 columns).
+Each group contains 81 constraints, resulting in a matrix with **729 rows and 324 columns** (9 x 81 rows and 4 x 81 columns).
 
 Each row represents a possible assignment of a digit to a cell. It contains exactly four `1`s, one for each constraint satisfied by that assignment. All other entries are `0`.
 
@@ -48,21 +49,25 @@ In SudoScan, all nodes share the same data structure and are stored in a contigu
 
 The column headers form a circular doubly linked list using `LEFT` and `RIGHT` links. This allows a column header to be removed from the active list and restored later without deleting it from memory.
 
-![Dancing Links example](images/dlx_example_matrix_structure.svg)
-
 **Spacer nodes**
 
 Data nodes within each row are stored consecutively in memory. A spacer node marks the end of each row and provides a way to traverse the row in both directions without storing explicit `LEFT` and `RIGHT` links in every data node.
 
 When traversal reaches a spacer from the left, it jumps to the first data node of the row. When traversal reaches it from the right, it jumps to the last data node.
 
-![Spacers](images/spacers.png)
+<div align="center">
+  <img src="images/spacers.png" width="75%" alt="Spacers">
+</div>
 
 **Vertical links**
 
 Each column contains a circular doubly linked list of data nodes representing the `1` entries in that column. These nodes are connected through `UP` and `DOWN` links, with the column header serving as the anchor of the list.
 
 When a row is hidden, its data nodes are temporarily unlinked from their respective vertical lists. The nodes remain in memory, retaining the link information needed to restore them later.
+
+<div align="center">
+  <img src="images/dlx_example_matrix_structure.svg" width="75%" alt="Dancing Links example">
+</div>
 
 ### Cover and Hide Operations
 
@@ -85,7 +90,10 @@ Consider the same 6×5 matrix used in the earlier example. The column lengths ar
 | 5 | 3 |
 
 The Minimum Remaining Values (MRV) heuristic selects column 4 because it has the fewest remaining candidates. Its only `1` is in row A.
-![Cover column 4](images/dlx_cover_column_4_en.svg)
+
+<div align="center">
+  <img src="images/dlx_cover_column_4_en.svg" width="75%" alt="Cover column 4">
+</div>
 
 The `cover(4)` operation removes the links between column headers 3 and 4, and between headers 4 and 5. It then connects headers 3 and 5 directly, excluding column 4 from the active header list. The column header and its data nodes remain in memory.
 
@@ -106,7 +114,9 @@ The `uncover(col)` and `unhide(row)` operations reverse the changes made by `cov
 
 #### Example: Uncovering Column 4
 
-![Cover column 4](images/dlx_uncover_column_4.svg)
+<div align="center">
+  <img src="images/dlx_uncover_column_4.svg" width="75%" alt="Uncover column 4">
+</div>
 
 The `uncover(4)` operation traverses the column's data nodes from bottom to top and calls `unhide(row)` for each one.
 
@@ -144,5 +154,4 @@ The search succeeds when all columns have been covered. The selected rows then f
 
 For the original treatment of Algorithm X and Dancing Links, see Donald Knuth's work:
 
-- [Dancing Links — Donald E. Knuth (Pre-Fascicle 5C, 2019)](https://cs.stanford.edu/~knuth/fasc5c.ps.gz)
-- [The Art of Computer Programming — Official website](https://cs.stanford.edu/~knuth/taocp.html)
+- [Dancing Links — Donald E. Knuth (Pre-Fascicle 5C, 2019)](https://archive.org)
