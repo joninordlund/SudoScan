@@ -8,16 +8,6 @@ Given a collection of sets, the exact cover problem asks us to select a subset o
 
 Consider the following binary matrix, where each row represents a set and each column represents an element to be covered.
 
-```text
-    1 2 3 4 5
-A   1 0 1 1 0
-B   0 1 0 0 0
-C   1 1 0 0 1
-D   1 0 1 0 1
-E   0 1 0 0 1
-F   0 1 1 0 0
-```
-
 The goal is to select rows such that every column contains exactly one selected `1`.
 
 In this example, **rows A and E form an exact cover**. Together, they cover all five columns, with each column covered exactly once.
@@ -38,7 +28,7 @@ The Sudoku rules can be expressed as four groups of constraints:
 - **Column constraint:** Each digit must appear exactly once in each column.
 - **Box constraint:** Each digit must appear exactly once in each 3×3 box.
 
-Each group contains 81 constraints, resulting in a matrix with **729 rows and 324 columns** (\(9 \times 81\) rows and \(4 \times 81\) columns).
+Each group contains 81 constraints, resulting in a matrix with **729 rows and 324 columns** 9 x 81 rows and 4 x 81 columns).
 
 Each row represents a possible assignment of a digit to a cell. It contains exactly four `1`s, one for each constraint satisfied by that assignment. All other entries are `0`.
 
@@ -57,6 +47,8 @@ In SudoScan, all nodes share the same data structure and are stored in a contigu
 **Horizontal links**
 
 The column headers form a circular doubly linked list using `LEFT` and `RIGHT` links. This allows a column header to be removed from the active list and restored later without deleting it from memory.
+
+![Dancing Links example](images/dlx_example_matrix_structure.svg)
 
 **Spacer nodes**
 
