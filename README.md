@@ -93,7 +93,7 @@ Consider the same 6×5 matrix used in the earlier example. The column lengths ar
 | 5 | 3 |
 
 The Minimum Remaining Values (MRV) heuristic selects column 4 because it has the fewest remaining candidates. Its only `1` is in row A.
-![Cover column 4](images\dlx_cover_column_4_en.svg)
+![Cover column 4](images/dlx_cover_column_4_en.svg)
 
 The `cover(4)` operation removes the links between column headers 3 and 4, and between headers 4 and 5. It then connects headers 3 and 5 directly, excluding column 4 from the active header list. The column header and its data nodes remain in memory.
 
@@ -114,7 +114,7 @@ The `uncover(col)` and `unhide(row)` operations reverse the changes made by `cov
 
 #### Example: Uncovering Column 4
 
-<!-- TODO: Add the uncover-column-4 illustration here -->
+![Cover column 4](images/dlx_uncover_column_4.svg)
 
 The `uncover(4)` operation traverses the column's data nodes from bottom to top and calls `unhide(row)` for each one.
 
