@@ -1,13 +1,21 @@
 #include "sudokuimage.h"
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QSizePolicy>
 #include <opencv2/opencv.hpp>
 
 SudokuImage::SudokuImage(QFrame* parent) :
     QFrame(parent), m_isImgLoaded(false)
 {
     m_image = new QLabel(this);
-    m_image->setFixedSize(parent->size() - QSize(12, 12));
     m_image->setAlignment(Qt::AlignCenter);
+    m_image->setSizePolicy(
+        QSizePolicy::Expanding,
+        QSizePolicy::Expanding);
+
+    QHBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(m_image);
 }
 
 void SudokuImage::setIsImgLoaded(bool loaded)
@@ -34,8 +42,31 @@ void SudokuImage::load(QString fileName)
     }
 }
 
+// bool SudokuImage::setImage(cv::Mat origImg)
+// {
+//     std::pair<reader::SudokuGrid, cv::Mat> data =
+//         m_reader.getImageData(origImg);
+
+//     m_origPixmap = cvMatColorToQPixmap(origImg.clone());
+
+//     if (data.second.empty())
+//     {
+//         emit imageOk(false);
+//         m_image->setPixmap(m_origPixmap);
+//         return false;
+//     }
+
+//     m_debugPixmap = cvMatGrayscaleToQPixmap(data.second.clone());
+//     m_sudokuMatrix = data.first;
+
+//     setDebugView(false);
+
+//     emit imageOk(true);
+//     return true;
+// }
 bool SudokuImage::setImage(cv::Mat origImg)
 {
+
     std::pair<reader::SudokuGrid, cv::Mat> data = m_reader.getImageData(origImg);
     m_origPixmap = cvMatColorToQPixmap(origImg.clone());
     m_origPixmap = m_origPixmap.scaled(
@@ -57,6 +88,7 @@ bool SudokuImage::setImage(cv::Mat origImg)
         Qt::SmoothTransformation);
     m_sudokuMatrix = data.first;
     emit imageOk(true);
+    // setDebugView(false);
     return true;
 }
 

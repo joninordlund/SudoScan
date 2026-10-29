@@ -29,9 +29,20 @@ GridView::GridView(int cellSize, QWidget* parent) :
 
     // setFixedSize(cellSize * 9, cellSize * 9);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    // QGridLayout* layout = new QGridLayout(this);
+    // layout->setSpacing(0);
+    // layout->setContentsMargins(0, 0, 0, 0);
+
     QGridLayout* layout = new QGridLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSizeConstraint(QLayout::SetNoConstraint);
+
+    for (int i = 0; i < 9; ++i)
+    {
+        layout->setRowStretch(i, 0);
+        layout->setColumnStretch(i, 0);
+    }
 
     for (int i = 0; i < 81; i++)
     {
@@ -69,10 +80,16 @@ void GridView::resizeEvent(QResizeEvent* event)
 
     int cellSize = qMin(width(), height()) / 9;
 
+    // qDebug() << "GridView size:" << size()
+    //          << "calculated cellSize:" << cellSize
+    //          << "first cell size:" << m_cells[0]->size();
+
     for (Cell* cell : m_cells)
     {
         cell->setSize(cellSize);
     }
+
+    // qDebug() << "first cell after resize:" << m_cells[0]->size();
 }
 
 void GridView::updateUI()

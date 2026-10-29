@@ -30,6 +30,7 @@ class SudokuImage : public QFrame {
     QPixmap m_origPixmap;
 
     bool m_isImgLoaded;
+    // bool m_showDebugView = false;
 
     std::vector<std::vector<int>> m_sudokuMatrix;
     bool setImage(cv::Mat img);
@@ -43,6 +44,8 @@ class SudokuImage : public QFrame {
     void onRemove();
     void onSetImage();
 
+  protected:
+    // void resizeEvent(QResizeEvent* event) override;
     // protected:
     //   void mousePressEvent(QMouseEvent* event);
 };

@@ -15,8 +15,8 @@ vector<vector<int>> DLXBuilder::findSolutions(int maxCount)
     double durationMs = durationUs / 1000.0;
 
     std::cout << "[PERF] getRandomSudokuSet: " << durationMs << " ms (" << durationUs
-              << " µs) | Sols: " << m_allSolutions.size()
-              << " | Avg/sol: " << durationUs / m_allSolutions.size() << " µs" << std::endl;
+              << " µs) | Sols: " << m_allSolutions.size() << endl;
+
     return m_allSolutions;
 }
 

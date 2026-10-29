@@ -86,6 +86,7 @@ class MainWindow : public QWidget
     qint64 m_accumulatedTimeMs{0};
     bool m_isTimerRunning = false;
     int m_areaSize;
+    QFrame* m_rightSquare = nullptr;
 
   private:
     QWidget* createLeftControls();
@@ -101,4 +102,7 @@ class MainWindow : public QWidget
     void updateSolutionCount(int current, int total);
     void renderSudokuPage(QPrinter* printer);
     void onCheckSudoku();
+
+    // protected:
+    //   void resizeEvent(QResizeEvent* event) override;
 };

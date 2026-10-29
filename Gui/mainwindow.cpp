@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "grid.h"
+// #include "squarewidget.h"
 #include "sudokuserializer.h"
 #include <QApplication>
 #include <QCheckBox>
@@ -21,7 +22,7 @@
 MainWindow::MainWindow(QWidget* parent) :
     QWidget{parent}, m_difficulty(1), m_grid(nullptr)
 {
-    // setFixedSize(1380, 650);
+    setFixedSize(1380, 650);
     QScreen* screen = QGuiApplication::primaryScreen();
     QRect available = screen->availableGeometry();
 
@@ -37,7 +38,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // int windowWidth = 2 * m_areaSize + fixedWidth + margins;
     // setFixedSize(windowWidth, 650);
-    setMinimumSize(1200, 650);
+    // setMinimumSize(1380, 650);
     m_areaSize = (m_areaSize / 9) * 9;
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -72,6 +73,18 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(redoAction, &QAction::triggered, m_grid, &GridView::onRedo);
     addAction(redoAction);
 }
+
+// void MainWindow::resizeEvent(QResizeEvent* event)
+// {
+//     QWidget::resizeEvent(event);
+
+//     qDebug() << "Window:" << size();
+//     qDebug() << "Grid:" << m_grid->size();
+//     qDebug() << "Right frame:" << m_rightSquare->size()
+//              << "position:" << m_rightSquare->pos();
+//     qDebug() << "Image area:" << m_rightSquare->parentWidget()->parentWidget()->size();
+//     qDebug() << "Right frame:" << m_rightSquare->size();
+// }
 
 QWidget* MainWindow::createLeftControls()
 {
@@ -236,29 +249,32 @@ QWidget* MainWindow::createSudokuArea()
 
     // QWidget* leftSquare = new QWidget;
     // leftSquare->setFixedSize(m_areaSize, m_areaSize);
+    // QWidget* leftSquare = new QWidget;
+    // leftSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    // leftSquare->setMaximumSize(700, 700);
     QWidget* leftSquare = new QWidget;
-    leftSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    leftSquare->setSizePolicy(
+        QSizePolicy::Expanding,
+        QSizePolicy::Expanding);
     leftSquare->setMaximumSize(700, 700);
-    
+
     QHBoxLayout* gridLayout = new QHBoxLayout(leftSquare);
     gridLayout->setContentsMargins(0, 0, 0, 0);
+    gridLayout->setAlignment(Qt::AlignCenter);
+
     m_grid = new GridView(m_areaSize / 9, leftSquare);
-    qDebug() << "leftSquare:" << leftSquare->size();
-    qDebug() << "grid:" << m_grid->size();
-    gridLayout->addWidget(m_grid);
+    gridLayout->addWidget(m_grid, 0, Qt::AlignCenter);
 
     // colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
     // colLayout->addStretch();
+    // colLayout->addWidget(leftSquare, 1, Qt::AlignCenter);
     colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
-    colLayout->addStretch();
-
-
-
+    // colLayout->addStretch();
 
     QWidget* bottomControls = new QWidget;
     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
     bottomLayout->setContentsMargins(0, 0, 0, 0);
-    colLayout->addWidget(bottomControls);
+    // colLayout->addWidget(bottomControls);
     // Check Button
     m_checkBtn = new QPushButton("Check");
     m_checkBtn->setFixedWidth(100);
@@ -283,7 +299,8 @@ QWidget* MainWindow::createSudokuArea()
     bottomLayout->addWidget(m_resetTimerBtn);
 
     colLayout->addWidget(bottomControls);
-
+    QTimer::singleShot(0, this, [this]()
+                       { qDebug() << "GridView actual size:" << m_grid->size(); });
     return centerColumn;
 }
 
@@ -295,20 +312,22 @@ QWidget* MainWindow::createImageArea()
     colLayout->setSpacing(8);
 
     QFrame* rightSquare = new QFrame;
-    // rightSquare->setFixedSize(m_areaSize, m_areaSize);
-    rightSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    rightSquare->setMaximumSize(700, 700);
+    m_rightSquare = rightSquare;
+
+    rightSquare->setFixedSize(m_areaSize, m_areaSize);
 
     rightSquare->setFrameShape(QFrame::Box);
     rightSquare->setLineWidth(3);
 
     QHBoxLayout* squareLayout = new QHBoxLayout(rightSquare);
     squareLayout->setContentsMargins(8, 8, 8, 8);
+    squareLayout->setAlignment(Qt::AlignCenter);
 
     m_image = new SudokuImage(rightSquare);
     squareLayout->addWidget(m_image);
 
-    colLayout->addWidget(rightSquare, 0, Qt::AlignTop);
+    colLayout->addWidget(rightSquare, 1, Qt::AlignTop);
+    // colLayout->addWidget(rightSquare, 1, Qt::AlignCenter);
 
     QWidget* bottomControls = new QWidget;
     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
@@ -320,6 +339,8 @@ QWidget* MainWindow::createImageArea()
     bottomLayout->addWidget(m_helpBtn);
 
     colLayout->addWidget(bottomControls);
+    QTimer::singleShot(0, this, [rightSquare]()
+                       { qDebug() << "rightSquare actual size:" << rightSquare->size(); });
     return rightColumn;
 }
 
