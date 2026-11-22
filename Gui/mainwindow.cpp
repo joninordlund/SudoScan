@@ -21,7 +21,7 @@
 MainWindow::MainWindow(QWidget* parent) :
     QWidget{parent}, m_difficulty(1), m_grid(nullptr)
 {
-    setFixedSize(1380, 650);
+    // setFixedSize(1380, 650);
     QScreen* screen = QGuiApplication::primaryScreen();
     QRect available = screen->availableGeometry();
 
@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget* parent) :
     // int windowWidth = 2 * m_areaSize + fixedWidth + margins;
     // setFixedSize(windowWidth, 650);
     // setMinimumSize(1380, 650);
+    int windowWidth = 2 * m_areaSize + fixedWidth + margins;
+    setFixedSize(windowWidth, 650);
+
     m_areaSize = (m_areaSize / 9) * 9;
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
