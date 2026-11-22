@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "grid.h"
-// #include "squarewidget.h"
 #include "sudokuserializer.h"
 #include <QApplication>
 #include <QCheckBox>
@@ -101,7 +100,7 @@ QWidget* MainWindow::createLeftControls()
     fileLbl->setObjectName("sectionLabel");
     m_loadBtn = new QPushButton("Load");
     m_saveBtn = new QPushButton("Save");
-    m_toPDFBtn = new QPushButton("To PDF");
+    m_toPDFBtn = new QPushButton("Print");
 
     layout->addWidget(fileLbl);
     layout->addWidget(m_loadBtn);
@@ -247,11 +246,6 @@ QWidget* MainWindow::createSudokuArea()
     colLayout->setContentsMargins(0, 0, 0, 0);
     colLayout->setSpacing(8);
 
-    // QWidget* leftSquare = new QWidget;
-    // leftSquare->setFixedSize(m_areaSize, m_areaSize);
-    // QWidget* leftSquare = new QWidget;
-    // leftSquare->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // leftSquare->setMaximumSize(700, 700);
     QWidget* leftSquare = new QWidget;
     leftSquare->setSizePolicy(
         QSizePolicy::Expanding,
@@ -265,11 +259,7 @@ QWidget* MainWindow::createSudokuArea()
     m_grid = new GridView(m_areaSize / 9, leftSquare);
     gridLayout->addWidget(m_grid, 0, Qt::AlignCenter);
 
-    // colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
-    // colLayout->addStretch();
-    // colLayout->addWidget(leftSquare, 1, Qt::AlignCenter);
     colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
-    // colLayout->addStretch();
 
     QWidget* bottomControls = new QWidget;
     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
@@ -339,8 +329,7 @@ QWidget* MainWindow::createImageArea()
     bottomLayout->addWidget(m_helpBtn);
 
     colLayout->addWidget(bottomControls);
-    QTimer::singleShot(0, this, [rightSquare]()
-                       { qDebug() << "rightSquare actual size:" << rightSquare->size(); });
+
     return rightColumn;
 }
 
@@ -352,13 +341,13 @@ QWidget* MainWindow::createImageControls()
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
 
-    // Image-osio
+    // Image section
     QLabel* imgLbl = new QLabel("Image");
     imgLbl->setObjectName("sectionLabel");
 
     m_loadImgBtn = new QPushButton("Load");
     m_removeImgBtn = new QPushButton("Remove");
-    m_setImgToGrid = new QPushButton("Set");
+    m_setImgToGrid = new QPushButton("Import");
     m_setImgToGrid->setEnabled(false);
 
     layout->addWidget(imgLbl);

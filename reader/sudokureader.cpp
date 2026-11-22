@@ -81,7 +81,7 @@ void SudokuReader::setImage(const cv::Mat& img)
     m_tess->SetVariable("classify_enable_adaptive_matcher", "1");
 }
 
-std::pair <reader::SudokuGrid, cv::Mat> SudokuReader::getSudokuCells(const cv::Mat& processedImg)
+std::pair<reader::SudokuGrid, cv::Mat> SudokuReader::getSudokuCells(const cv::Mat& processedImg)
 {
     // reader::SudokuGrid grid;
     reader::SudokuGrid grid(9, std::vector<int>(9, 0));

@@ -37,3 +37,4 @@ linuxdeploy*.AppImage
 readme.zip
 readme/
 
+.cache

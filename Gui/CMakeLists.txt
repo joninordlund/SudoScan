@@ -18,7 +18,6 @@ add_executable(SudoScan
     include/qrcodegen.hpp qrcodegen.cpp
     help.html
     helpdialog.cpp include/helpdialog.h
-    include/squarewidget.h squarewidget.cpp
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
@@ -39,7 +38,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
     include/qrcodegen.hpp qrcodegen.cpp
     help.html
     helpdialog.cpp include/helpdialog.h
-    include/squarewidget.h squarewidget.cpp
 )
 
 target_include_directories(SudoScan

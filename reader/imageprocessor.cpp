@@ -5,6 +5,7 @@
 cv::Mat ImageProcessor::getSudokuImage()
 {
     normalizeImageSize();
+    // cv::imwrite("/home/linuxguy/tmp/original.png", this->image);
     cv::Mat thresh = makeThresholdedImageForContour(this->image);
     cv::Mat cropped = cropSquare(thresh);
     if (cropped.empty())
@@ -18,6 +19,7 @@ cv::Mat ImageProcessor::getSudokuImage()
     }
     cv::Mat deskewedSudoku;
     cv::bitwise_not(temp, deskewedSudoku);
+    cv::imwrite("/home/linuxguy/tmp/deskewed.png", deskewedSudoku);
     return deskewedSudoku;
 }
 
@@ -42,8 +44,6 @@ cv::Mat ImageProcessor::makeThresholdedImageForContour(const cv::Mat& img)
                           cv::THRESH_BINARY_INV, 25, 8);
     cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     cv::morphologyEx(thresh, thresh, cv::MORPH_CLOSE, kernel);
-
-    cv::imwrite("/home/linuxguy/tmp/debug_failed_thresh.png", thresh);
     return thresh;
 }
 
@@ -126,7 +126,6 @@ cv::Mat ImageProcessor::deskewImage(const cv::Mat& cropped)
     }
     if (bestContour.size() != 4)
     {
-        cv::imwrite("/home/linuxguy/tmp/debug_failed_best.png", thresh);
         std::cerr << "deskew: Error: couldn't find a suitable square" << std::endl;
         return cv::Mat();
     }
@@ -172,7 +171,6 @@ cv::Mat ImageProcessor::deskewImage(const cv::Mat& cropped)
     cv::Mat deskewedImage, gray;
     cv::cvtColor(cropped, gray, cv::COLOR_BGR2GRAY);
     cv::warpPerspective(thresh, deskewedImage, perspectiveTr, cv::Size(width, height));
-    cv::imwrite("/home/linuxguy/tmp/debug_failed_contours2.png", deskewedImage);
     return deskewedImage;
 }
 
@@ -280,7 +278,6 @@ cv::Mat ImageProcessor::getProcessedSudokuImage(const cv::Mat& deskewedOriginal)
         cv::Mat rowImage;
         for (int x = 0; x < 9; x++)
         {
-
             cv::Mat cell = getCellImage(deskewedOriginal, x, y);
 
             cv::Mat resizedCell;
@@ -306,6 +303,6 @@ cv::Mat ImageProcessor::getProcessedSudokuImage(const cv::Mat& deskewedOriginal)
             cv::vconcat(finalImage, rowImage, finalImage);
         }
     }
-    cv::imwrite("/home/linuxguy/tmp/debug_failed_final.png", finalImage);
+    // cv::imwrite("/home/linuxguy/tmp/final.png", finalImage);
     return finalImage;
 }

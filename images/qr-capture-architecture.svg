@@ -1,0 +1,51 @@
+<svg width="680" height="490" viewBox="0 0 680 490" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+<title>Sudoku QR capture flow</title>
+<desc>Sequence diagram showing how the Qt app, server, and phone browser communicate to capture a photo of a sudoku via a QR code and session-id polling.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#3d3d3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<rect x="40" y="30" width="180" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="130" y="51" text-anchor="middle" font-size="14" font-weight="600" fill="#0C447C">Qt app</text>
+<text x="130" y="69" text-anchor="middle" font-size="12" fill="#185FA5">Desktop client</text>
+
+<rect x="260" y="30" width="200" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="360" y="51" text-anchor="middle" font-size="14" font-weight="600" fill="#085041">Server</text>
+<text x="360" y="69" text-anchor="middle" font-size="12" fill="#0F6E56">FastAPI, session store</text>
+
+<rect x="500" y="30" width="130" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="565" y="51" text-anchor="middle" font-size="14" font-weight="600" fill="#712B13">Phone</text>
+<text x="565" y="69" text-anchor="middle" font-size="12" fill="#993C1D">Browser</text>
+
+<line x1="130" y1="86" x2="130" y2="440" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="3 3"/>
+<line x1="360" y1="86" x2="360" y2="440" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="3 3"/>
+<line x1="565" y1="86" x2="565" y2="440" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="3 3"/>
+
+<text x="245" y="122" text-anchor="middle" font-size="12" fill="#5F5E5A">1 &#183; request session id</text>
+<line x1="130" y1="130" x2="358" y2="130" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<text x="245" y="167" text-anchor="middle" font-size="12" fill="#5F5E5A">2 &#183; return id (token_urlsafe)</text>
+<line x1="360" y1="175" x2="132" y2="175" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<rect x="55" y="200" width="150" height="42" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="130" y="217" text-anchor="middle" font-size="12" fill="#0C447C">3 &#183; show QR (id + URL)</text>
+<text x="130" y="233" text-anchor="middle" font-size="12" fill="#0C447C">and start polling</text>
+
+<text x="462" y="272" text-anchor="middle" font-size="12" fill="#5F5E5A">4 &#183; scan QR, open capture page</text>
+<line x1="565" y1="280" x2="362" y2="280" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<text x="462" y="317" text-anchor="middle" font-size="12" fill="#5F5E5A">5 &#183; upload photo as &lt;id&gt;</text>
+<line x1="565" y1="325" x2="362" y2="325" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<text x="245" y="362" text-anchor="middle" font-size="12" fill="#5F5E5A">6 &#183; poll using id (loop)</text>
+<line x1="130" y1="370" x2="358" y2="370" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<text x="245" y="407" text-anchor="middle" font-size="12" fill="#5F5E5A">7 &#183; return image when ready</text>
+<line x1="360" y1="415" x2="132" y2="415" stroke="#3d3d3a" stroke-width="1" marker-end="url(#arrow)"/>
+
+<circle cx="130" cy="440" r="3" fill="#3d3d3a"/>
+<circle cx="360" cy="440" r="3" fill="#3d3d3a"/>
+<circle cx="565" cy="440" r="3" fill="#3d3d3a"/>
+</svg>

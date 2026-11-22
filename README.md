@@ -1,3 +1,180 @@
+# SudoScan
+
+SudoScan is a desktop application for solving, creating, and managing Sudoku puzzles. It combines an interactive Sudoku interface with an efficient solving algorithm and image recognition capabilities.
+
+Sudoku puzzles can be entered manually or imported from photographs. The built-in image recognition pipeline processes the image and identifies the digits, allowing the user to review and correct the results before solving. Images can also be transferred directly from a mobile phone using a QR-code-based transfer system.
+
+The application is built with C++17 and Qt 6, with a separate Python-based service handling image transfers. Its solving engine uses the Dancing Links (DLX) algorithm to efficiently solve Sudoku puzzles and generate fully solved grids for puzzle creation.
+
+<p align="center">
+  <img src="images/sudoscan-main.png" width="100%">
+  <em>Main view</em>
+</p>
+
+
+## Features
+
+### Sudoku Solving
+
+SudoScan provides an interactive Sudoku interface with tools for both solving and creating puzzles.
+
+**Solve Mode**
+- Enter and solve Sudoku puzzles manually.
+- Add pencil marks using corner or center notation.
+- Use the Peek feature to temporarily reveal the solution.
+- Check the current solution.
+- Track solving time.
+- Undo and redo moves.
+
+**Edit Clues Mode**
+- Generate a random, fully solved Sudoku grid.
+- Create custom puzzles by removing numbers from the generated grid.
+- Enter clue numbers, which are displayed in black.
+- View the number of solutions found (up to 25).
+
+<p align="center">
+  <img src="images/solving.png" width="100%">
+  <em>Solving puzzle using center marks and corner marks</em>
+</p>
+
+### Image Recognition
+
+Sudoku puzzles can be imported directly from photographs. The image processing pipeline detects the Sudoku grid, corrects perspective distortion, and prepares individual cells for digit recognition using Tesseract OCR.
+
+Recognized digits are transferred to the Sudoku grid, where they can be reviewed and corrected before solving.
+
+### Puzzle Generation and Lock Mode
+
+SudoScan uses the Dancing Links (DLX) algorithm to generate random, fully solved Sudoku grids.
+
+Puzzles can be created by removing numbers from a randomly generated, fully solved grid. Users can also create puzzles manually using Edit Clues mode.
+
+**Lock Mode** provides a way to explore the solutions of a puzzle. Solutions can be browsed when there are up to 25, while puzzles with more solutions use randomly selected solutions.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/generated.png" alt="Generated Sudoku puzzle" width="85%">
+      <br>
+      <em>Generated puzzle</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/solution.png" alt="Solution" width="85%">
+      <br>
+      <em>Solution</em>
+    </td>
+  </tr>
+  
+</table>
+
+### QR Image Transfer
+
+Images can be transferred directly from a mobile phone to SudoScan using a QR code.
+
+The application creates a temporary session and displays a QR code that can be scanned with a phone. The image is uploaded through a separate FastAPI service and retrieved by the desktop application.
+
+
+
+<p align="center">
+  <img src="images/sudoscan-and-mobile.png" width="100%" alt="SudoScan QR code image transfer using a mobile phone">
+</p>
+
+### Saving and Printing
+
+- Save and load Sudoku puzzles in JSON format.
+- Print puzzles using the built-in print preview.
+- Export puzzles to PDF through the print dialog.
+  
+## Technologies
+
+SudoScan is built using the following technologies and libraries:
+
+| Technology               | Purpose                                     |
+| ------------------------ | ------------------------------------------- |
+| C++17                    | Main application language                   |
+| Qt 6                     | GUI framework                               |
+| Qt JSON                  | JSON serialization and deserialization      |
+| Qt Print Support         | Print preview and PDF export                |
+| OpenCV                   | Image processing and perspective correction |
+| Tesseract OCR            | Digit recognition                           |
+| Python                   | Image transfer service                      |
+| FastAPI                  | HTTP API for image transfers                |
+| Nayuki QR Code Generator (qrcodegen) | QR code generation                          |
+| CMake                    | Build system                                |
+
+### Algorithms
+
+**Dancing Links (DLX)**
+
+The Sudoku solver is based on Donald Knuth's Dancing Links algorithm, an efficient implementation of Algorithm X for solving exact cover problems.
+## Image Processing and Digit Recognition
+
+SudoScan uses OpenCV for image preprocessing and Tesseract OCR for digit recognition. The reader pipeline transforms a photograph of a Sudoku puzzle into a 9 × 9 grid of recognized digits.
+
+### 1. Grid Detection
+
+The input image is first resized if its width exceeds 1200 pixels. It is then converted to grayscale, blurred, and binarized using adaptive Gaussian thresholding. Morphological closing helps connect small gaps in the detected structures.
+
+OpenCV contour detection is used to find a large quadrilateral candidate corresponding to the Sudoku grid. The surrounding rectangular region is cropped from the original image.
+
+### 2. Perspective Correction
+
+The cropped image is processed to detect the Sudoku grid's four corners. The corners are ordered and used to calculate a perspective transformation.
+
+The image is then warped into a square of 900 × 900 pixels, providing a normalized view of the grid.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/original.png" alt="Original Sudoku photograph taken at an angle" width="75%">
+      <br>
+      <em>Original image</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/deskewed.png" alt="Perspective-corrected Sudoku image" width="100%">
+      <br>
+      <em>Perspective-corrected image</em>
+    </td>
+  </tr>  
+</table>
+<em>Perspective correction transforms an oblique photograph of a Sudoku puzzle into a normalized square image for cell extraction and digit recognition.</em>
+
+### 3. Cell Preprocessing
+
+The normalized grid is divided into 81 cells. Each cell is processed individually to isolate its digit from the surrounding grid lines.
+
+The detected digit is cropped, padded, resized while preserving its aspect ratio, and centered on a 100 × 100 pixel canvas. Small contours are removed to reduce noise before OCR.
+
+If no suitable digit contour is found, an empty image is returned for the cell.
+
+### 4. Digit Recognition
+
+Tesseract OCR recognizes one character at a time. Recognition is restricted to the digits 1–9, and a confidence threshold is used to filter uncertain results.
+
+A recognized digit is accepted only when the output begins with a digit from 1 to 9 and the mean text confidence exceeds 71. Otherwise, the cell is assigned the value `0`.
+
+A zero therefore represents either an empty cell or a digit that could not be recognized with sufficient confidence.
+
+### 5. Output
+
+The reader returns a 9 × 9 Sudoku grid together with a processed image for display in the application. The recognized grid can then be reviewed and corrected by the user before solving.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/processed.png" alt="Processed Sudoku image" width="100%">
+      <br>
+      <em>Processed image</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/recognized.png" alt="Recognized Sudoku grid" width="100%">
+      <br>
+      <em>Recognized Sudoku grid</em>
+    </td>
+  </tr>
+</table>
+
+
 ## Dancing Links (DLX)
 
 SudoScan uses **Dancing Links (DLX)**, a technique introduced by Donald Knuth for efficiently implementing Algorithm X, a recursive, depth-first search algorithm for solving the **exact cover problem**.
@@ -35,7 +212,7 @@ Each row represents a possible assignment of a digit to a cell. It contains exac
 
 The rows are grouped by cell: the first nine rows represent the possible digits for the first cell, the next nine represent the possibilities for the second cell, and so on.
 
-An exact cover selects assignments that satisfy every constraint exactly once. These assignments form a completed Sudoku grid. If there is exactly one exact cover, the puzzle has a unique solution. Multiple exact covers indicate multiple solutions, while no exact cover means the puzzle is unsolvable.
+An exact cover selects assignments that satisfy every constraint exactly once. These assignments form a completed Sudoku grid. If there is exactly one exact cover, the puzzle has a unique solution. Multiple exact covers correspond to multiple Sudoku solutions, while no exact cover means that the puzzle has no solution.
 
 ### The Dancing Links Data Structure
 
@@ -82,12 +259,12 @@ This temporarily excludes conflicting candidates from the search without deletin
 Consider the same 6×5 matrix used in the earlier example. The column lengths are:
 
 | Column | Length |
-|---|---:|
-| 1 | 3 |
-| 2 | 4 |
-| 3 | 3 |
-| 4 | 1 |
-| 5 | 3 |
+| ------ | -----: |
+| 1      |      3 |
+| 2      |      4 |
+| 3      |      3 |
+| 4      |      1 |
+| 5      |      3 |
 
 The Minimum Remaining Values (MRV) heuristic selects column 4 because it has the fewest remaining candidates. Its only `1` is in row A.
 
@@ -156,3 +333,45 @@ For the original treatment of Algorithm X and Dancing Links, see Donald Knuth's 
 
 - [Dancing Links — Donald E. Knuth (Pre-Fascicle 5C, 2019)](https://cs.stanford.edu/~knuth/fasc5c.ps.gz)
 - [The Art of Computer Programming — Official website](https://cs.stanford.edu/~knuth/taocp.html)
+
+## QR Code Image Capture
+
+SudoScan supports transferring Sudoku images directly from a mobile phone to the desktop application using a QR code. This eliminates the need to transfer photographs manually between devices.
+
+### Architecture
+
+The image transfer involves three components:
+
+- **Qt desktop application:** Generates the QR code, manages the transfer session and retrieves the uploaded image.
+- **FastAPI server:** Creates and maintains temporary sessions, receives image uploads and provides images for download.
+- **Mobile browser:** Opens the capture page through the QR code and uploads the photograph to the server.
+
+![QR Code Capture Architecture](images/qr-capture-architecture.svg)
+
+### Transfer Process
+
+1. The Qt application requests a new session from the server.
+2. The server generates a short, URL-safe session ID and returns it to the application. Keeping the ID short helps maintain a compact QR code that is easy to scan, even when displayed at a small size.
+3. The application generates a QR code containing the capture page URL and the session ID.
+4. The user scans the QR code with a phone, opening the capture page in the mobile browser.
+5. The user takes a photograph and uploads it to the server using the session ID.
+6. Meanwhile, the Qt application periodically polls the server to check whether an image has been uploaded.
+7. Once the image is available, the application downloads it and passes the image data to the Sudoku image processing pipeline.
+
+### Session Management
+
+Each transfer uses a unique session ID. The server validates the ID before accepting an upload, preventing uploads to invalid or expired sessions.
+
+The desktop application uses asynchronous HTTP requests and polls the server every 500 milliseconds. Once an image is available, polling stops and the application downloads it.
+
+Each uploaded image is treated as a single-use resource. After a successful download, the server schedules the file for deletion. A background cleanup task also removes expired sessions and old image files.
+
+After a successful transfer, the desktop application automatically creates a new session and displays a new QR code, ready for the next photograph.
+
+## Downloads
+
+Pre-built versions of SudoScan are available on the [GitHub Releases](RELEASES_URL) page.
+
+## License
+
+SudoScan is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
