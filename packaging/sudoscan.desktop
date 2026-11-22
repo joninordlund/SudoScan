@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=SudoScan
+Exec=SudoScan
+Icon=sudoscan
+Categories=Game;LogicGame;
+Terminal=false

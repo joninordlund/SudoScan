@@ -5,6 +5,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFileDialog>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPainter>
@@ -15,48 +16,107 @@
 #include <QtPrintSupport/qprintpreviewdialog.h>
 #include <helpdialog.h>
 
-// const int areaSize = 630;
-// const int areaSize = 540;
+// HUOM: ei nimeä "Ui", koska uic generoi oman Ui-nimiavaruuden.
+namespace Layout
+{
+constexpr int leftPanelW = 96;
+constexpr int rightPanelW = 120;
+constexpr int columnSpacing = 20;
+constexpr int rowSpacing = 8;
+constexpr int barH = 34;
+constexpr int windowMargin = 11;
+constexpr int maxAreaSize = 540;
+constexpr int minAreaSize = 270;
+constexpr int extraMargin = 40;
+// Arvio ruutujen ulkopuolisesta korkeudesta (otsikkopalkki, alarivi, marginaalit)
+constexpr int verticalChrome = 150;
+} // namespace Layout
+
+namespace
+{
+
+int computeAreaSize()
+{
+    const QRect available = QGuiApplication::primaryScreen()->availableGeometry();
+
+    const int fixedWidth = Layout::leftPanelW + Layout::rightPanelW + 3 * Layout::columnSpacing;
+    const int byWidth = (available.width() - fixedWidth - 2 * Layout::windowMargin - Layout::extraMargin) / 2;
+    const int byHeight = available.height() - Layout::verticalChrome - Layout::extraMargin;
+
+    int size = qMin(Layout::maxAreaSize, qMin(byWidth, byHeight));
+    size = qMax(size, Layout::minAreaSize);
+    return (size / 9) * 9; // jaollinen yhdeksällä
+}
+
+QLabel* makeSectionLabel(const QString& text)
+{
+    auto* l = new QLabel(text);
+    l->setObjectName("sectionLabel");
+    return l;
+}
+
+QPushButton* makeIconButton(const QString& icon, const QString& name)
+{
+    auto* b = new QPushButton;
+    b->setIcon(QIcon(icon));
+    b->setIconSize({24, 24});
+    b->setFixedSize(35, 35);
+    b->setObjectName(name);
+    return b;
+}
+
+QWidget* makeToggleRow(QLabel* label, ToggleSwitch* toggle)
+{
+    auto* w = new QWidget;
+    auto* l = new QHBoxLayout(w);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->setSpacing(8);
+    l->addWidget(label);
+    l->addWidget(toggle);
+    return w;
+}
+
+QWidget* makeButtonRow(QPushButton* a, QPushButton* b)
+{
+    auto* w = new QWidget;
+    auto* l = new QHBoxLayout(w);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->setSpacing(5);
+    l->addWidget(a);
+    l->addWidget(b);
+    return w;
+}
+
+} // namespace
 
 MainWindow::MainWindow(QWidget* parent) :
     QWidget{parent}, m_difficulty(1), m_grid(nullptr)
 {
-    // setFixedSize(1380, 650);
-    QScreen* screen = QGuiApplication::primaryScreen();
-    QRect available = screen->availableGeometry();
+    m_areaSize = computeAreaSize();
 
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(Layout::windowMargin, Layout::windowMargin,
+                                   Layout::windowMargin, Layout::windowMargin);
 
-    constexpr int fixedWidth = 96 + 120 + 3 * 20;
-    constexpr int margins = 22;
-    constexpr int extraMargin = 40;
+    // Ruudut rivillä 0 ja alarivit rivillä 1 samassa gridissä -> alarivit tasan.
+    auto* centerArea = new QWidget;
+    auto* grid = new QGridLayout(centerArea);
+    grid->setHorizontalSpacing(Layout::columnSpacing);
+    grid->setVerticalSpacing(Layout::rowSpacing);
+    grid->setContentsMargins(0, 10, 0, 0);
 
-    int maxAreaSize =
-        (available.width() - fixedWidth - margins - extraMargin) / 2;
-
-    m_areaSize = qMin(540, maxAreaSize);
-
-    // int windowWidth = 2 * m_areaSize + fixedWidth + margins;
-    // setFixedSize(windowWidth, 650);
-    // setMinimumSize(1380, 650);
-    int windowWidth = 2 * m_areaSize + fixedWidth + margins;
-    setFixedSize(windowWidth, 650);
-
-    m_areaSize = (m_areaSize / 9) * 9;
-
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    QWidget* centerArea = new QWidget;
-    QHBoxLayout* centerLayout = new QHBoxLayout(centerArea);
-    centerLayout->setSpacing(20);
-    centerLayout->setContentsMargins(0, 10, 0, 0);
-
-    centerLayout->addWidget(createLeftControls(), 0, Qt::AlignTop);
-    centerLayout->addWidget(createSudokuArea(), 1);
-    centerLayout->addWidget(createImageArea(), 1);
-    centerLayout->addWidget(createImageControls(), 0, Qt::AlignTop);
+    //                      widget                   rivi sar. rs cs  tasaus
+    grid->addWidget(createLeftControls(),             0, 0, 3, 1, Qt::AlignTop);
+    grid->addWidget(createSudokuArea(),               0, 1, Qt::AlignTop);
+    grid->addWidget(createSudokuBar(),                1, 1);
+    grid->addWidget(createImageArea(),                0, 2, Qt::AlignTop);
+    grid->addWidget(createImageBar(),                 1, 2);
+    grid->addWidget(createImageControls(),            0, 3, 3, 1, Qt::AlignTop);
+    grid->setColumnStretch(1, 1);
+    grid->setColumnStretch(2, 1);
+    grid->setRowStretch(2, 1); // ylimääräinen tila menee rivin 2 (tyhjä) alle, ei ruutujen väliin
 
     mainLayout->addWidget(centerArea);
-    mainLayout->addLayout(createBottomBar());
-    mainLayout->setContentsMargins(11, 11, 11, 11);
 
     onEditModeToggled(m_editModeToggle->isChecked());
     m_qrManager = new QrManager(this);
@@ -64,93 +124,60 @@ MainWindow::MainWindow(QWidget* parent) :
     m_qrManager->start();
     qApp->installEventFilter(this);
     updateUI(false);
+    setupShortcuts();
 
-    QAction* undoAction = new QAction(this);
+    // Layout päättää koon -> toimii myös Windowsin 125 % / 150 % skaalauksella
+    setFixedSize(sizeHint());
+}
+
+void MainWindow::setupShortcuts()
+{
+    auto* undoAction = new QAction(this);
     undoAction->setShortcut(QKeySequence::Undo);
+    undoAction->setShortcutContext(Qt::WindowShortcut);
     connect(undoAction, &QAction::triggered, m_grid, &GridView::onUndo);
     addAction(undoAction);
 
-    QAction* redoAction = new QAction(this);
+    auto* redoAction = new QAction(this);
     redoAction->setShortcut(QKeySequence::Redo);
+    redoAction->setShortcutContext(Qt::WindowShortcut);
     connect(redoAction, &QAction::triggered, m_grid, &GridView::onRedo);
     addAction(redoAction);
 }
-
-// void MainWindow::resizeEvent(QResizeEvent* event)
-// {
-//     QWidget::resizeEvent(event);
-
-//     qDebug() << "Window:" << size();
-//     qDebug() << "Grid:" << m_grid->size();
-//     qDebug() << "Right frame:" << m_rightSquare->size()
-//              << "position:" << m_rightSquare->pos();
-//     qDebug() << "Image area:" << m_rightSquare->parentWidget()->parentWidget()->size();
-//     qDebug() << "Right frame:" << m_rightSquare->size();
-// }
 
 QWidget* MainWindow::createLeftControls()
 {
     const int spacing = 4;
     QWidget* controlArea = new QWidget;
-    controlArea->setFixedWidth(96);
-    // controlArea->setFixedHeight(630);
+    controlArea->setFixedWidth(Layout::leftPanelW);
     QVBoxLayout* layout = new QVBoxLayout(controlArea);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
 
     // File section
-    QLabel* fileLbl = new QLabel("File");
-    fileLbl->setObjectName("sectionLabel");
     m_loadBtn = new QPushButton("Load");
     m_saveBtn = new QPushButton("Save");
     m_toPDFBtn = new QPushButton("Print");
 
-    layout->addWidget(fileLbl);
+    layout->addWidget(makeSectionLabel("File"));
     layout->addWidget(m_loadBtn);
     layout->addWidget(m_saveBtn);
     layout->addWidget(m_toPDFBtn);
     layout->addSpacing(spacing);
 
     // Sudoku section
-    QLabel* sudokuLbl = new QLabel("Sudoku");
-    sudokuLbl->setObjectName("sectionLabel");
-    layout->addWidget(sudokuLbl);
+    layout->addWidget(makeSectionLabel("Sudoku"));
 
     // Undo/Redo arrows
-    QWidget* undoRedoWidget = new QWidget;
-    QHBoxLayout* undoRedoLayout = new QHBoxLayout(undoRedoWidget);
-    undoRedoLayout->setContentsMargins(0, 0, 0, 0);
-    undoRedoLayout->setSpacing(5);
-
-    m_undoBtn = new QPushButton();
+    m_undoBtn = makeIconButton(":/icons/icons/undo.svg", "undo");
+    m_redoBtn = makeIconButton(":/icons/icons/redo.svg", "redo");
     m_undoBtn->setEnabled(false);
-    m_undoBtn->setIcon(QIcon(":/icons/icons/undo.svg"));
-    m_undoBtn->setIconSize(QSize(24, 24));
-    m_undoBtn->setFixedSize(35, 35);
-    m_undoBtn->setObjectName("undo");
-    m_redoBtn = new QPushButton();
     m_redoBtn->setEnabled(false);
-    m_redoBtn->setIcon(QIcon(":/icons/icons/redo.svg"));
-    m_redoBtn->setFixedSize(35, 35);
-    m_redoBtn->setIconSize(QSize(24, 24));
-    m_redoBtn->setObjectName("redo");
-
-    undoRedoLayout->addWidget(m_undoBtn);
-    undoRedoLayout->addWidget(m_redoBtn);
-    layout->addWidget(undoRedoWidget);
+    layout->addWidget(makeButtonRow(m_undoBtn, m_redoBtn));
 
     // Mode toggle
-    QWidget* modeWidget = new QWidget;
-    QHBoxLayout* modeLayout = new QHBoxLayout(modeWidget);
-    modeLayout->setContentsMargins(0, 0, 0, 0);
-    modeLayout->setSpacing(8);
-
-    QLabel* modeLabel = new QLabel("Mode:");
     m_editModeToggle = new ToggleSwitch(this);
-
-    modeLayout->addWidget(modeLabel);
-    modeLayout->addWidget(m_editModeToggle);
-    layout->addWidget(modeWidget);
+    layout->addWidget(makeToggleRow(new QLabel("Mode:"), m_editModeToggle));
 
     // Clear and Random buttons
     m_clearBtn = new QPushButton("Clear");
@@ -158,82 +185,49 @@ QWidget* MainWindow::createLeftControls()
     m_generateBtn = new QPushButton("Generate");
     m_generateBtn->setMinimumHeight(30);
     QHBoxLayout* starLayout = setupStars();
-
     starLayout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(m_clearBtn);
     layout->addWidget(m_randomBtn);
 
-    QLabel* symmLbl = new QLabel(this);
-    symmLbl->setText("Symmetry:");
+    QLabel* symmLbl = new QLabel("Symmetry:", this);
     m_symmetryCombo = new QComboBox(this);
     m_symmetryCombo->setMinimumHeight(30);
-
     m_symmetryCombo->addItem("None", static_cast<int>(Symmetry::None));
     m_symmetryCombo->addItem("Rotational", static_cast<int>(Symmetry::Rotate180));
     m_symmetryCombo->addItem("Horizontal", static_cast<int>(Symmetry::Horizontal));
     m_symmetryCombo->addItem("Vertical", static_cast<int>(Symmetry::Vertical));
 
-    // QVBoxLayout* genGroup = new QVBoxLayout();
-    // genGroup->setSpacing(2);
-
     QVBoxLayout* genGroup = new QVBoxLayout();
     genGroup->setSpacing(4);
-
     genGroup->addWidget(m_generateBtn);
     genGroup->addLayout(starLayout);
     genGroup->addWidget(symmLbl);
     genGroup->addWidget(m_symmetryCombo);
-
     genGroup->setSizeConstraint(QLayout::SetMinimumSize);
 
     layout->addLayout(genGroup);
     updateStars(m_difficulty);
 
     // Solutions section
-    QLabel* solLbl = new QLabel("Solutions");
-
     m_peekBtn = new QPushButton("Peek");
     m_peekBtn->setObjectName("colorGreen");
-    layout->addWidget(solLbl);
+    layout->addWidget(new QLabel("Solutions"));
     layout->addWidget(m_peekBtn);
 
     // Lock toggle
-    QWidget* lockWidget = new QWidget;
-    QHBoxLayout* lockLayout = new QHBoxLayout(lockWidget);
-    lockLayout->setContentsMargins(0, 0, 0, 0);
-    lockLayout->setSpacing(8);
-
     m_lockLabel = new QLabel("Lock:");
     m_lockToggle = new ToggleSwitch(this);
-
-    lockLayout->addWidget(m_lockLabel);
-    lockLayout->addWidget(m_lockToggle);
-    layout->addWidget(lockWidget);
+    layout->addWidget(makeToggleRow(m_lockLabel, m_lockToggle));
 
     // Navigation arrows
-    QWidget* arrowWidget = new QWidget;
-    QHBoxLayout* arrowLayout = new QHBoxLayout(arrowWidget);
-    arrowLayout->setContentsMargins(0, 0, 0, 0);
-    arrowLayout->setSpacing(5);
+    m_leftBrowseBtn = makeIconButton(":/icons/icons/chevron_left.svg", "leftBrowse");
+    m_rightBrowseBtn = makeIconButton(":/icons/icons/chevron_right.svg", "rightBrowse");
+    layout->addWidget(makeButtonRow(m_leftBrowseBtn, m_rightBrowseBtn));
 
-    m_leftBrowseBtn = new QPushButton();
-    m_leftBrowseBtn->setIcon(QIcon(":/icons/icons/chevron_left.svg"));
-    m_leftBrowseBtn->setIconSize(QSize(24, 24));
-    m_leftBrowseBtn->setFixedSize(35, 35);
-    m_leftBrowseBtn->setObjectName("leftBrowse");
-    m_rightBrowseBtn = new QPushButton();
-    m_rightBrowseBtn->setIcon(QIcon(":/icons/icons/chevron_right.svg"));
-    m_rightBrowseBtn->setIconSize(QSize(24, 24));
-    m_rightBrowseBtn->setFixedSize(35, 35);
-    m_rightBrowseBtn->setObjectName("rightBrowse");
-
-    arrowLayout->addWidget(m_leftBrowseBtn);
-    arrowLayout->addWidget(m_rightBrowseBtn);
     m_solIndexLabel = new QLabel("- / -");
     m_solIndexLabel->setAlignment(Qt::AlignCenter);
     m_solIndexLabel->setStyleSheet("color: #2c3e50; font-weight: bold; font-size: 14px;");
-    layout->addWidget(arrowWidget);
     layout->addWidget(m_solIndexLabel);
 
     layout->addStretch();
@@ -243,17 +237,8 @@ QWidget* MainWindow::createLeftControls()
 
 QWidget* MainWindow::createSudokuArea()
 {
-    QWidget* centerColumn = new QWidget;
-    // centerColumn->setFixedHeight(m_areaSize + 100);
-    QVBoxLayout* colLayout = new QVBoxLayout(centerColumn);
-    colLayout->setContentsMargins(0, 0, 0, 0);
-    colLayout->setSpacing(8);
-
     QWidget* leftSquare = new QWidget;
-    leftSquare->setSizePolicy(
-        QSizePolicy::Expanding,
-        QSizePolicy::Expanding);
-    leftSquare->setMaximumSize(700, 700);
+    leftSquare->setFixedSize(m_areaSize, m_areaSize);
 
     QHBoxLayout* gridLayout = new QHBoxLayout(leftSquare);
     gridLayout->setContentsMargins(0, 0, 0, 0);
@@ -262,12 +247,16 @@ QWidget* MainWindow::createSudokuArea()
     m_grid = new GridView(m_areaSize / 9, leftSquare);
     gridLayout->addWidget(m_grid, 0, Qt::AlignCenter);
 
-    colLayout->addWidget(leftSquare, 0, Qt::AlignTop);
+    return leftSquare;
+}
 
-    QWidget* bottomControls = new QWidget;
-    QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
-    bottomLayout->setContentsMargins(0, 0, 0, 0);
-    // colLayout->addWidget(bottomControls);
+QWidget* MainWindow::createSudokuBar()
+{
+    QWidget* bar = new QWidget;
+    bar->setFixedHeight(Layout::barH);
+    auto* l = new QHBoxLayout(bar);
+    l->setContentsMargins(0, 0, 0, 0);
+
     // Check Button
     m_checkBtn = new QPushButton("Check");
     m_checkBtn->setFixedWidth(100);
@@ -285,30 +274,21 @@ QWidget* MainWindow::createSudokuArea()
     m_qtimer = new QTimer(this);
     m_qtimer->setInterval(1000);
 
-    bottomLayout->addWidget(m_checkBtn);
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(m_timerLabel);
-    bottomLayout->addWidget(m_timerToggleBtn);
-    bottomLayout->addWidget(m_resetTimerBtn);
+    l->addWidget(m_checkBtn);
+    l->addStretch();
+    l->addWidget(m_timerLabel);
+    l->addWidget(m_timerToggleBtn);
+    l->addWidget(m_resetTimerBtn);
 
-    colLayout->addWidget(bottomControls);
-    QTimer::singleShot(0, this, [this]()
-                       { qDebug() << "GridView actual size:" << m_grid->size(); });
-    return centerColumn;
+    return bar;
 }
 
 QWidget* MainWindow::createImageArea()
 {
-    QWidget* rightColumn = new QWidget;
-    QVBoxLayout* colLayout = new QVBoxLayout(rightColumn);
-    colLayout->setContentsMargins(0, 0, 0, 0);
-    colLayout->setSpacing(8);
-
     QFrame* rightSquare = new QFrame;
     m_rightSquare = rightSquare;
 
     rightSquare->setFixedSize(m_areaSize, m_areaSize);
-
     rightSquare->setFrameShape(QFrame::Box);
     rightSquare->setLineWidth(3);
 
@@ -319,41 +299,39 @@ QWidget* MainWindow::createImageArea()
     m_image = new SudokuImage(rightSquare);
     squareLayout->addWidget(m_image);
 
-    colLayout->addWidget(rightSquare, 1, Qt::AlignTop);
-    // colLayout->addWidget(rightSquare, 1, Qt::AlignCenter);
+    return rightSquare;
+}
 
-    QWidget* bottomControls = new QWidget;
-    QHBoxLayout* bottomLayout = new QHBoxLayout(bottomControls);
-    bottomLayout->setContentsMargins(0, 0, 0, 0);
+QWidget* MainWindow::createImageBar()
+{
+    QWidget* bar = new QWidget;
+    bar->setFixedHeight(Layout::barH);
+    auto* l = new QHBoxLayout(bar);
+    l->setContentsMargins(0, 0, 0, 0);
 
     m_helpBtn = new QPushButton("Help");
 
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(m_helpBtn);
+    l->addStretch();
+    l->addWidget(m_helpBtn);
 
-    colLayout->addWidget(bottomControls);
-
-    return rightColumn;
+    return bar;
 }
 
 QWidget* MainWindow::createImageControls()
 {
     QWidget* imageControlArea = new QWidget;
-    imageControlArea->setFixedWidth(120);
+    imageControlArea->setFixedWidth(Layout::rightPanelW);
     QVBoxLayout* layout = new QVBoxLayout(imageControlArea);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
 
     // Image section
-    QLabel* imgLbl = new QLabel("Image");
-    imgLbl->setObjectName("sectionLabel");
-
     m_loadImgBtn = new QPushButton("Load");
     m_removeImgBtn = new QPushButton("Remove");
     m_setImgToGrid = new QPushButton("Import");
     m_setImgToGrid->setEnabled(false);
 
-    layout->addWidget(imgLbl);
+    layout->addWidget(makeSectionLabel("Image"));
     layout->addWidget(m_loadImgBtn);
     layout->addWidget(m_removeImgBtn);
     layout->addSpacing(10);
@@ -372,7 +350,6 @@ QWidget* MainWindow::createImageControls()
     m_qrCodeLabel->setLineWidth(1);
     m_qrCodeLabel->setScaledContents(true);
     m_qrCodeLabel->setStyleSheet("background-color: white;");
-
     m_qrCodeLabel->setText("QR");
     m_qrCodeLabel->setAlignment(Qt::AlignCenter);
 
@@ -388,21 +365,6 @@ QWidget* MainWindow::createImageControls()
     layout->addStretch();
 
     return imageControlArea;
-}
-
-QHBoxLayout* MainWindow::createBottomBar()
-{
-    QHBoxLayout* buttonLayout = new QHBoxLayout;
-    buttonLayout->setContentsMargins(0, 0, 0, 0);
-
-    QLabel* editModeLabel = new QLabel("Mode:");
-    m_editModeValueLbl = new QLabel("Solve");
-
-    buttonLayout->addWidget(editModeLabel);
-    buttonLayout->addWidget(m_editModeValueLbl);
-    buttonLayout->addStretch();
-
-    return buttonLayout;
 }
 
 QHBoxLayout* MainWindow::setupStars()
@@ -472,7 +434,7 @@ void MainWindow::connectSignals()
     connect(m_symmetryCombo, &QComboBox::currentIndexChanged, this, [this](int index)
             {
         if (index < 0) return;
-        
+
         Symmetry symmetry = static_cast<Symmetry>(m_symmetryCombo->currentData().toInt());
         m_grid->setSymmetry(symmetry); });
 
@@ -690,10 +652,6 @@ void MainWindow::onGenerate()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_grid->onGenerate();
-
-    // resetTimer();
-    // onToggleTimer();
-
     QApplication::restoreOverrideCursor();
 }
 
@@ -705,7 +663,6 @@ void MainWindow::onLockToggled(bool locked)
 
 void MainWindow::onEditModeToggled(bool checked)
 {
-    m_editModeValueLbl->setText(checked ? "Edit clues" : "Solve");
     m_grid->onEditModeChanged(checked);
     m_lockToggle->setChecked(checked && m_lockToggle->isChecked());
     updateUI(checked);
@@ -818,11 +775,10 @@ void MainWindow::onLoadRequested()
         {
             m_grid->updateUI();
             m_grid->update();
-            qDebug() << "Load successful: " << fileName;
         }
         else
         {
-            QMessageBox::critical(this, "Virhe", "File load failed.");
+            QMessageBox::critical(this, "Error", "File load failed.");
         }
     }
 }

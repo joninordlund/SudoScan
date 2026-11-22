@@ -94,6 +94,9 @@ class MainWindow : public QWidget
     QWidget* createImageArea();
     QWidget* createImageControls();
     QHBoxLayout* createBottomBar();
+    QWidget* createSudokuBar();
+    QWidget* createImageBar();
+    void setupShortcuts();
     void connectSignals();
 
     QHBoxLayout* setupStars();
