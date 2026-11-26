@@ -10,7 +10,7 @@
 #include <QTimer>
 #include <QVector>
 #include <QWidget>
-#include <QtConcurrent>
+// #include <QtConcurrent>
 
 enum EEditMode {
     SOLVE = 1,
@@ -86,7 +86,7 @@ class GridView : public QWidget {
     void enterDigit(int digit, EMarkType type);
     void deleteCell();
     void changeCell(int digit, EMarkType type, bool isGiven);
-    CellData handleNumberInput(int x, int y, int digit, EMarkType inputType);
+    CellData handleNumberInput(int x, int y, int digit, EMarkType inputType, bool isGiven);
     void resetSolutions();
     void peekSingleSolution();
 

@@ -1,7 +1,6 @@
 #include "grid.h"
 #include "cellchange.h"
 #include "sudokusolver.h"
-
 #include <QApplication>
 #include <QResizeEvent>
 #include <QDir>
@@ -25,13 +24,7 @@ GridView::GridView(int cellSize, QWidget* parent) :
     m_removedCount(33),
     m_solLocked(false)
 {
-    // setFixedSize(630, 630);
-
-    // setFixedSize(cellSize * 9, cellSize * 9);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // QGridLayout* layout = new QGridLayout(this);
-    // layout->setSpacing(0);
-    // layout->setContentsMargins(0, 0, 0, 0);
 
     QGridLayout* layout = new QGridLayout(this);
     layout->setSpacing(0);
@@ -61,15 +54,15 @@ GridView::GridView(int cellSize, QWidget* parent) :
 
     connect(m_debounceTimer, &QTimer::timeout, this, [this]()
             {
-        Matrix currentBoard = m_board.toIntMatrix();
-        int maxCount = m_solutionSet.maxCount();
-        
-        (void)QtConcurrent::run([this, currentBoard, maxCount]() {
-            m_solutionSet.updateSolutions(currentBoard, maxCount);
-            QMetaObject::invokeMethod(this, [this]() {
-                emit solutionCountChanged(m_solutionSet.currentIndex() + 1, m_solutionSet.count());
-            }, Qt::QueuedConnection);
-        }); });
+                Matrix currentBoard = m_board.toIntMatrix();
+                int maxCount = m_solutionSet.maxCount();
+                
+                m_solutionSet.updateSolutions(currentBoard, maxCount);
+                
+                emit solutionCountChanged(
+                    m_solutionSet.currentIndex() + 1,
+                    m_solutionSet.count()); });
+
     updateUI();
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -77,19 +70,12 @@ GridView::GridView(int cellSize, QWidget* parent) :
 void GridView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
-
     int cellSize = qMin(width(), height()) / 9;
-
-    // qDebug() << "GridView size:" << size()
-    //          << "calculated cellSize:" << cellSize
-    //          << "first cell size:" << m_cells[0]->size();
 
     for (Cell* cell : m_cells)
     {
         cell->setSize(cellSize);
     }
-
-    // qDebug() << "first cell after resize:" << m_cells[0]->size();
 }
 
 void GridView::updateUI()
@@ -111,9 +97,6 @@ void GridView::applyStateChange(int x, int y, const CellData& newData)
     cell->setCornerMarks(newData.cornerMarks);
     cell->setCenterMarks(newData.centerMarks);
     cell->update();
-
-    qDebug() << "Applied state at (" << x << "," << y << ") digit:" << newData.digit
-             << "Is grid full now?" << m_board.isGridFull();
 }
 
 void GridView::newSudoku(const reader::SudokuGrid& grid)
@@ -335,6 +318,11 @@ void GridView::onEditModeChanged(bool checked)
 
 void GridView::onClearSolution()
 {
+    if (m_solLocked)
+    {
+        return;
+    }
+
     QString text;
     QString info;
     if (m_editMode == SOLVE)
@@ -377,16 +365,13 @@ void GridView::onRandom()
 
 void GridView::handleHistoryChanged()
 {
-    // m_debounceTimer->start();
-    // m_solutionSet.updateSolutions(m_board.toIntMatrix());
-    // m_solutionSet.updateSolutions(m_board.toIntMatrix(), m_solutionSet.maxCount());
-    // emit solutionCountChanged(m_solutionSet.currentIndex() + 1, m_solutionSet.count());
+    m_debounceTimer->start();
     updateGridFullStatus();
 }
 
 void GridView::setDifficulty(int level)
 {
-    vector<int> removed{35, 42, 48, 52, 55};
+    vector<int> removed{41, 45, 48, 53, 60};
     m_removedCount = removed[level - 1];
 }
 
@@ -400,7 +385,6 @@ void GridView::onGenerate()
 void GridView::onSolutionLocked(bool locked)
 {
     m_solLocked = locked;
-    // m_solutionSet.updateSolutions(m_board.toIntMatrix(), m_solutionSet.maxCount());
     if (locked)
     {
         m_solutionSet.updateSolutions(m_board.toIntMatrix(), m_solutionSet.maxCount());
@@ -459,8 +443,13 @@ void GridView::deleteCell()
 
 void GridView::changeCell(int digit, EMarkType type, bool isGiven)
 {
+    if (m_solLocked)
+    {
+        return;
+    }
+
     vector<CellChange> command;
-    bool digitChanged = false;
+    // bool digitChanged = false;
     for (Cell* cell : as_const(m_selectedCellSet))
     {
         if (!cell->isGiven() || m_editMode == EDIT_CLUES)
@@ -468,15 +457,15 @@ void GridView::changeCell(int digit, EMarkType type, bool isGiven)
             int x = cell->row();
             int y = cell->col();
             CellData oldState = m_board.data(x, y);
-            CellData newState = handleNumberInput(x, y, digit, type);
+            CellData newState = handleNumberInput(x, y, digit, type, isGiven);
             if (oldState == newState)
             {
                 continue;
             }
-            if (oldState.digit != newState.digit)
-            {
-                digitChanged = true;
-            }
+            // if (oldState.digit != newState.digit)
+            // {
+            //     digitChanged = true;
+            // }
             applyStateChange(x, y, newState);
             command.push_back(CellChange{x, y, oldState, newState});
         }
@@ -485,23 +474,24 @@ void GridView::changeCell(int digit, EMarkType type, bool isGiven)
     {
         m_history.setNewCommand(command);
     }
-    if (digitChanged && m_editMode != SOLVE)
-    {
-        m_debounceTimer->start();
-    }
+    // if (digitChanged && m_editMode != SOLVE)
+    // {
+    //     m_debounceTimer->start();
+    // }
     updateGridFullStatus();
 }
-
-CellData GridView::handleNumberInput(int x, int y, int digit, EMarkType type)
+CellData GridView::handleNumberInput(int x, int y, int digit, EMarkType type, bool isGiven)
 {
     CellData newState = m_board.data(x, y);
     switch (type)
     {
         case DIGIT:
-            qDebug() << "Digit:" << digit;
-            newState.isGiven = (m_editMode == EDIT_CLUES);
-            newState.digit = (newState.digit == digit && !newState.isGiven) ? 0 : digit;
+        {
+            bool sameDigit = (newState.digit == digit);
+            newState.digit = sameDigit ? 0 : digit;
+            newState.isGiven = isGiven;
             break;
+        }
         case DELETE:
             newState.digit = 0;
             newState.isGiven = false;

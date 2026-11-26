@@ -8,6 +8,7 @@
         <file>icons/redo.svg</file>
         <file>icons/chevron_right.svg</file>
         <file>icons/chevron_left.svg</file>
+        <file>icons/sudoscan.png</file>
     </qresource>
     <qresource prefix="/">
         <file>style.css</file>

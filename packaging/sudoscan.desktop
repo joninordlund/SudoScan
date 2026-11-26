@@ -5,3 +5,4 @@ Exec=SudoScan
 Icon=sudoscan
 Categories=Game;LogicGame;
 Terminal=false
+StartupWMClass=SudoScan

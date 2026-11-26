@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QPdfWriter>
 #include <QScreen>
+#include <QSettings>
 #include <QStyle>
 #include <QVBoxLayout>
 #include <QtPrintSupport/qprintpreviewdialog.h>
@@ -98,14 +99,12 @@ MainWindow::MainWindow(QWidget* parent) :
     mainLayout->setContentsMargins(Layout::windowMargin, Layout::windowMargin,
                                    Layout::windowMargin, Layout::windowMargin);
 
-    // Ruudut rivillä 0 ja alarivit rivillä 1 samassa gridissä -> alarivit tasan.
     auto* centerArea = new QWidget;
     auto* grid = new QGridLayout(centerArea);
     grid->setHorizontalSpacing(Layout::columnSpacing);
     grid->setVerticalSpacing(Layout::rowSpacing);
     grid->setContentsMargins(0, 10, 0, 0);
 
-    //                      widget                   rivi sar. rs cs  tasaus
     grid->addWidget(createLeftControls(),             0, 0, 3, 1, Qt::AlignTop);
     grid->addWidget(createSudokuArea(),               0, 1, Qt::AlignTop);
     grid->addWidget(createSudokuBar(),                1, 1);
@@ -114,7 +113,7 @@ MainWindow::MainWindow(QWidget* parent) :
     grid->addWidget(createImageControls(),            0, 3, 3, 1, Qt::AlignTop);
     grid->setColumnStretch(1, 1);
     grid->setColumnStretch(2, 1);
-    grid->setRowStretch(2, 1); // ylimääräinen tila menee rivin 2 (tyhjä) alle, ei ruutujen väliin
+    grid->setRowStretch(2, 1);
 
     mainLayout->addWidget(centerArea);
 
@@ -126,8 +125,15 @@ MainWindow::MainWindow(QWidget* parent) :
     updateUI(false);
     setupShortcuts();
 
-    // Layout päättää koon -> toimii myös Windowsin 125 % / 150 % skaalauksella
     setFixedSize(sizeHint());
+
+    if (QScreen* screen = QGuiApplication::primaryScreen())
+    {
+        const QRect available = screen->availableGeometry();
+        const QRect windowGeometry = frameGeometry();
+
+        move(available.center() - windowGeometry.center());
+    }
 }
 
 void MainWindow::setupShortcuts()

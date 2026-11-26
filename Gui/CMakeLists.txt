@@ -16,7 +16,7 @@ add_executable(SudoScan
     # style.css
     include/qrmanager.h qrmanager.cpp
     include/qrcodegen.hpp qrcodegen.cpp
-    help.html
+
     helpdialog.cpp include/helpdialog.h
 )
 

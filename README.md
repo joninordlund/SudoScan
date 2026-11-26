@@ -2,9 +2,9 @@
 
 SudoScan is a desktop application for solving, creating, and managing Sudoku puzzles. It combines an interactive Sudoku interface with an efficient solving algorithm and image recognition capabilities.
 
-Sudoku puzzles can be entered manually or imported from photographs. The built-in image recognition pipeline processes the image and identifies the digits, allowing the user to review and correct the results before solving. Images can also be transferred directly from a mobile phone using a QR-code-based transfer system.
+Sudoku puzzles can be generated automatically, entered manually, or imported from photographs. The built-in image recognition pipeline processes the image and identifies the digits, allowing the user to review and correct the results before solving. Images can also be transferred directly from a mobile phone using a QR-code-based transfer system.
 
-The application is built with C++17 and Qt 6, with a separate Python-based service handling image transfers. Its solving engine uses the Dancing Links (DLX) algorithm to efficiently solve Sudoku puzzles and generate fully solved grids for puzzle creation.
+The application is built with C++17 and Qt 6, with a separate Python-based service handling image transfers. Its solving engine uses the Dancing Links (DLX) algorithm to efficiently solve Sudoku puzzles and generate valid puzzles with unique solutions.
 
 <p align="center">
   <img src="images/sudoscan-main.png" width="100%">

@@ -26,27 +26,24 @@ struct Node
     Node() : up(-1), down(-1), left(-1), right(-1), top(-1), len(-1), row(-1) {}
 };
 
-class DLXBuilder
-{
-public:
-  DLXBuilder(Matrix mat, int maxSolCount = 64)
-      : m_matrix(mat), m_maxCount(maxSolCount), m_rndGen(std::random_device{}()) {
-      M = m_matrix.size();
-      N = m_matrix[0].size();
-      m_solution.resize(M);
-  };
+class DLXBuilder {
+  public:
+    DLXBuilder(int numCols, vector<array<int, 4>> rows, int maxSolCount = 64)
+        : N(numCols), m_rows(std::move(rows)), m_maxCount(maxSolCount),
+          m_rndGen(std::random_device{}()) {
+        m_solution.resize(N);
+    }
     vector<vector<int>> findSolutions(int maxCount);
     void setRandomMode(bool enabled) { m_randomMode = enabled; }
 
-private:
+  private:
     vector<Node> m_nodes;
-    Matrix m_matrix;
-    vector<int> m_lenVec;
+    vector<array<int, 4>> m_rows;
     vector<int> m_solution;
-    int N, M;
+    int N;
     vector<vector<int>> m_allSolutions;
     int m_maxCount;
-    bool m_randomMode;
+    bool m_randomMode = false;
     std::mt19937 m_rndGen;
 
     void build();

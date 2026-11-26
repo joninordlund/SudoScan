@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QFileInfo>
 #include <QFontDatabase>
 
 void loadStyleSheet()
@@ -25,6 +26,13 @@ void loadStyleSheet()
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
+    QGuiApplication::setApplicationName("SudoScan");
+    QGuiApplication::setDesktopFileName("sudoscan");
+    app.setWindowIcon(QIcon(":/icons/icons/sudoscan.png"));
+
+    // QIcon icon(":/icons/icons/sudoscan.png");
+    // qDebug() << "Icon null?" << icon.isNull() << "Sizes:" << icon.availableSizes();
+    // app.setWindowIcon(QIcon(":/icons/icons/sudoscan.png"));
 
     QCoreApplication::setOrganizationName("SudoScan");
     QCoreApplication::setApplicationName("SudoScan");

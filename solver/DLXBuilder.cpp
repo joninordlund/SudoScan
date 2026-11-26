@@ -1,133 +1,80 @@
 #include "DLXBuilder.h"
+#include <algorithm>
 #include <cassert>
-#include <chrono>
 #include <limits>
+#include <random>
 
 vector<vector<int>> DLXBuilder::findSolutions(int maxCount)
 {
     m_maxCount = maxCount;
+
+    // auto start = std::chrono::high_resolution_clock::now();
     build();
-    auto start = std::chrono::high_resolution_clock::now();
     search(0);
-    auto end = std::chrono::high_resolution_clock::now();
+    // auto end = std::chrono::high_resolution_clock::now();
 
-    auto durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    double durationMs = durationUs / 1000.0;
+    // auto durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // double durationMs = durationUs / 1000.0;
 
-    std::cout << "[PERF] getRandomSudokuSet: " << durationMs << " ms (" << durationUs
-              << " µs) | Sols: " << m_allSolutions.size() << endl;
+    // std::cout << "[PERF] getRandomSudokuSet: " << durationMs << " ms (" << durationUs
+    //           << " µs) | Sols: " << m_allSolutions.size() << endl;
 
     return m_allSolutions;
 }
 
 void DLXBuilder::build()
 {
-    int M = m_matrix.size();
-    int N = m_matrix[0].size();
-    m_lenVec.resize(N);
+    const int R = (int)m_rows.size();
 
-    // To simplify the handling, replace 1's in the matrix by
-    // node indexes
-    int idx = N + 2;
-    for (int i = 0; i < M; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            if (m_matrix[i][j] > 0)
-            {
-                m_matrix[i][j] = idx++;
-                m_lenVec[j]++;
-            }
-        }
-        // skip spacer indexes
-        idx++;
-    }
-    // attach the header
-    vector<int> head;
-    for (int i = 1; i <= N; i++)
-    {
-        head.push_back(i);
-    }
-    m_matrix.insert(m_matrix.begin(), head);
+    // 0 = root, 1..N = columns, spacer, (4 nodes, spacer) * R = rows
+    m_nodes.assign(N + 2 + 5 * R, Node());
 
-    int maxSize = N * M + N + (N + 1); // matrix + header + spacers
-    m_nodes.clear();
-    m_nodes.resize(maxSize);
-
-    // set uo the root node
-    m_nodes[0].up = -1;
-    m_nodes[0].down = -1;
     m_nodes[0].left = N;
     m_nodes[0].right = 1;
     m_nodes[0].top = 0;
     m_nodes[0].row = 0;
     m_nodes[0].len = -1;
 
-    auto posMod = [](int a, int b)
+    for (int c = 1; c <= N; c++)
     {
-        return ((a % b) + b) % b;
-    };
-
-    // link the columns
-    int nodeCount = 0;
-    for (int i = 0; i < M + 1; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            if (m_matrix[i][j] > 0)
-            {
-                int f = posMod(i - 1, M + 1);
-                while (true)
-                {
-                    if (m_matrix[f][j] > 0)
-                        break;
-                    f = posMod(f - 1, M + 1);
-                }
-                int up = m_matrix[f][j];
-                f = posMod(i + 1, M + 1);
-                while (true)
-                {
-                    if (m_matrix[f][j] > 0)
-                        break;
-                    f = posMod(f + 1, M + 1);
-                }
-                int down = m_matrix[f][j];
-                Node node;
-                node.up = up;
-                node.down = down;
-                node.left = -1;
-                node.right = -1;
-                node.row = i;
-                node.top = j + 1;
-                if (i == 0)
-                {
-                    node.left = posMod(j, N + 1);
-                    node.right = posMod(j + 2, N + 1);
-                    node.len = m_lenVec[j];
-                }
-                else
-                {
-                    node.len = -1;
-                }
-                m_nodes[m_matrix[i][j]] = node;
-                nodeCount++;
-            }
-        }
+        Node& h = m_nodes[c];
+        h.left = c - 1;
+        h.right = (c == N) ? 0 : c + 1;
+        h.up = h.down = c;
+        h.top = c;
+        h.row = 0;
+        h.len = 0;
     }
-    m_nodes.resize(nodeCount + M + 2);
-    // set the spacers
-    int prev = -1;
-    for (int i = N + 1; i < m_nodes.size(); i++)
+
+    vector<int> last(N + 1);
+    for (int c = 0; c <= N; c++)
+        last[c] = c;
+
+    // ensimmäinen spacer (top = -1)
+    int idx = N + 1;
+    m_nodes[idx].top = -1;
+
+    for (int r = 0; r < R; r++)
     {
-        if (m_nodes[i].top < 0)
+        int base = N + 2 + r * 5;
+        for (int k = 0; k < 4; k++)
         {
-            if (prev >= 0)
-            {
-                m_nodes[i].up = prev + 1;
-                m_nodes[prev].down = i - 1;
-            }
-            prev = i;
+            int id = base + k;
+            int c = m_rows[r][k] + 1;
+            Node& nd = m_nodes[id];
+            nd.top = c;
+            nd.row = r + 1;
+            nd.up = last[c];
+            nd.down = c;
+            m_nodes[last[c]].down = id;
+            m_nodes[c].up = id;
+            last[c] = id;
+            m_nodes[c].len++;
         }
+        m_nodes[base - 1].down = base + 3;
+        Node& sp = m_nodes[base + 4];
+        sp.top = -1;
+        sp.up = base;
     }
 }
 
@@ -212,7 +159,7 @@ void DLXBuilder::search(int x)
         return;
     }
 
-    int col = chooseCol();
+    int col = chooseColMRV();
     cover(col);
 
     vector<int> rowCandidates;
@@ -221,6 +168,10 @@ void DLXBuilder::search(int x)
     {
         rowCandidates.push_back(r);
         r = m_nodes[r].down;
+    }
+    if (m_randomMode)
+    {
+        std::shuffle(rowCandidates.begin(), rowCandidates.end(), m_rndGen);
     }
 
     for (int r : rowCandidates)
