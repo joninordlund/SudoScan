@@ -20,6 +20,16 @@ add_executable(SudoScan
     helpdialog.cpp include/helpdialog.h
 )
 
+if(WIN32)
+    target_sources(SudoScan PRIVATE
+        ${CMAKE_SOURCE_DIR}/packaging/windows_icon.rc
+    )
+
+    target_include_directories(SudoScan PRIVATE
+        ${CMAKE_SOURCE_DIR}/packaging
+    )
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
     main.cpp
     cell.cpp include/cell.h
