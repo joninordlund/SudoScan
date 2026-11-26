@@ -375,3 +375,9 @@ Pre-built versions of SudoScan are available on the [GitHub Releases](RELEASES_U
 ## License
 
 SudoScan is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For questions, feedback, or suggestions, feel free to contact me:
+
+**Email:** joni.nordlund@gmail.com
